@@ -764,6 +764,124 @@ html,body{
 }
 .age-no:hover{ border-color: var(--red) !important; }
 
+.cart-tools{
+  padding: 8px 14px 0 14px;
+}
+.cart-tools button{
+  width:100%;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--muted);
+  padding: 7px 0;
+  border-radius:8px;
+  font-size:11.5px;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.cart-tools button:hover:not(:disabled){ border-color: var(--red); color: var(--red); }
+.cart-tools button:disabled{ opacity:.35; cursor:not-allowed; }
+
+.discount-row{ color: var(--red) !important; }
+.discount-area{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 4px 16px 0 16px;
+}
+.discount-label{
+  font-size:11px;
+  color: var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+.discount-chips{
+  display:flex;
+  gap:6px;
+  flex:1;
+}
+.discount-chips button{
+  flex:1;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--muted);
+  padding: 6px 0;
+  border-radius:7px;
+  font-size:11.5px;
+  cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;
+}
+.discount-chips button:hover{ border-color: var(--teal); color: var(--text); }
+.discount-chips button.active{
+  background: rgba(255,107,94,0.14);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.pay-method{
+  display:flex;
+  gap:8px;
+  padding: 12px 16px 0 16px;
+}
+.pm-btn{
+  flex:1;
+  padding: 9px 0;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size:12.5px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.pm-btn:hover{ color: var(--text); }
+.pm-btn.active{
+  background: rgba(63,214,192,0.12);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.bons-row{
+  display:grid;
+  grid-template-columns: 0.6fr 1fr 1fr 0.8fr 1fr;
+  gap:8px;
+  align-items:center;
+  padding: 9px 8px;
+  border-bottom:1px solid var(--line);
+  font-size:12px;
+}
+.bons-row .bnr{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.bons-row .btime{ color: var(--muted); font-size:11px; }
+.bons-row .bamt{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.bons-row .bstatus{
+  font-size:10.5px;
+  font-weight:700;
+  padding: 3px 8px;
+  border-radius:5px;
+  text-align:center;
+}
+.bons-row .bstatus.paid{ background: rgba(89,214,124,0.14); color: var(--green); }
+.bons-row .bstatus.void{ background: rgba(255,107,94,0.14); color: var(--red); }
+.bons-row .bactions{ display:flex; gap:6px; }
+.bons-row .bactions button{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--text);
+  padding: 5px 9px;
+  border-radius:6px;
+  font-size:10.5px;
+  cursor:pointer;
+}
+.bons-row .bactions button.void-btn{ border-color: var(--red); color: var(--red); }
+.bons-row .bactions button:hover{ filter:brightness(1.2); }
+.bons-empty{
+  color: var(--muted);
+  font-size:13px;
+  text-align:center;
+  padding: 30px 0;
+}
+
 ::-webkit-scrollbar{ width:8px; height:8px; }
 ::-webkit-scrollbar-thumb{ background: var(--line); border-radius:4px; }
 ::-webkit-scrollbar-track{ background: transparent; }
@@ -777,6 +895,9 @@ html,body{
       <h1>MARKT<span>/24</span> · KASSE 03</h1>
     </div>
     <div class="header-right">
+      <button class="lager-btn" id="drawerBtn">🗄 Lade</button>
+      <button class="lager-btn" id="bonsBtn">🧾 Bons</button>
+      <button class="lager-btn" id="reportBtn">📊 Bericht</button>
       <button class="lager-btn" id="lagerBtn">📦 Lager</button>
       <div class="kasse-id" id="itemCount">0 Artikel</div>
       <div class="clock" id="clock">--:--:--</div>
@@ -801,22 +922,34 @@ html,body{
       <div class="label">Zu zahlen</div>
       <div class="total-num" id="totalDisplay">0,00 €</div>
     </div>
+    <div class="cart-tools">
+      <button id="undoBtn" disabled>↩ Letzten Artikel stornieren</button>
+    </div>
     <div class="cart-list" id="cartList">
       <div class="cart-empty">Warenkorb leer.<br>Artikel antippen oder Nummer scannen.</div>
     </div>
     <div class="summary">
       <div class="row"><span>Nettobetrag</span><span id="sumNetto">0,00 €</span></div>
       <div class="row"><span>MwSt (19%)</span><span id="sumMwst">0,00 €</span></div>
+      <div class="row discount-row" id="discountRow" style="display:none;"><span>Rabatt</span><span id="sumDiscount">0,00 €</span></div>
       <div class="row total"><span>Bruttobetrag</span><span class="val" id="sumBrutto">0,00 €</span></div>
     </div>
+    <div class="discount-area">
+      <span class="discount-label">Rabatt</span>
+      <div class="discount-chips" id="discountChips"></div>
+    </div>
+    <div class="pay-method" id="payMethod">
+      <button class="pm-btn active" data-method="bar">💶 Bar</button>
+      <button class="pm-btn" data-method="karte">💳 Karte</button>
+    </div>
     <div class="pay-area">
-      <div class="pay-row">
+      <div class="pay-row" id="givenRow">
         <input id="givenInput" type="text" inputmode="decimal" placeholder="Gegeben (€)">
       </div>
       <div class="quick-cash" id="quickCash"></div>
-      <div class="change-row"><span>Rückgeld</span><span class="val" id="changeVal">0,00 €</span></div>
+      <div class="change-row" id="changeRow"><span>Rückgeld</span><span class="val" id="changeVal">0,00 €</span></div>
       <div class="actions">
-        <button class="btn btn-clear" id="clearBtn">Leeren</button>
+        <button class="btn btn-clear" id="clearBtn">Storno</button>
         <button class="btn btn-pay" id="payBtn" disabled>Zahlung abschließen</button>
       </div>
     </div>
@@ -859,6 +992,22 @@ html,body{
 
 <div class="toast" id="toast"></div>
 
+<div class="overlay" id="bonsOverlay">
+  <div class="lager-panel">
+    <div class="lager-head">
+      <h2>Beleg-Historie</h2>
+      <button id="bonsCloseBtn">✕</button>
+    </div>
+    <div class="lager-table-wrap">
+      <div id="bonsTable"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="reportOverlay">
+  <div class="receipt" id="reportBody"></div>
+</div>
+
 <script>
 const PRODUCTS = [{"id": "1001", "name": "Wasser Still", "category": "Getränk", "price": 0.25, "pack": "6"}, {"id": "1002", "name": "Wasser Medium", "category": "Getränk", "price": 0.25, "pack": "6"}, {"id": "1003", "name": "Wasser spritzig", "category": "Getränk", "price": 0.25, "pack": "6"}, {"id": "1004", "name": "Cola Pur", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1005", "name": "Cola Zero", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1006", "name": "Cola Light", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1007", "name": "Cola Normal", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1008", "name": "Limonade Orange", "category": "Getränk", "price": 0.85, "pack": "6"}, {"id": "1009", "name": "Limonade Zitrone", "category": "Getränk", "price": 0.85, "pack": "6"}, {"id": "1010", "name": "Limonade Waldmeister", "category": "Getränk", "price": 0.85, "pack": "6"}, {"id": "1011", "name": "Orangensaft", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1012", "name": "Orangensaft light", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1013", "name": "Apfelsaft", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1014", "name": "Apfelsaft Light", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1015", "name": "Multivitaminsaft", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1016", "name": "Multivitaminsaft Light", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1017", "name": "Bier Export", "category": "Getränk", "price": 0.65, "pack": "20"}, {"id": "1018", "name": "Bier Pilsner", "category": "Getränk", "price": 0.65, "pack": "20"}, {"id": "1019", "name": "Radler", "category": "Getränk", "price": 0.65, "pack": "20"}, {"id": "1020", "name": "Bier Alkoholfrei", "category": "Getränk", "price": 0.65, "pack": "11"}, {"id": "1021", "name": "Malzbier", "category": "Getränk", "price": 0.65, "pack": "6"}, {"id": "1022", "name": "Rotwein", "category": "Getränk", "price": 3.99, "pack": "6"}, {"id": "1023", "name": "Weißwein", "category": "Getränk", "price": 3.99, "pack": "6"}, {"id": "1024", "name": "Rosewein", "category": "Getränk", "price": 3.99, "pack": "6"}, {"id": "2001", "name": "Banane", "category": "Obst/Gemüse", "price": 1.29, "pack": "1"}, {"id": "2002", "name": "Apfel", "category": "Obst/Gemüse", "price": 1.49, "pack": "1"}, {"id": "2003", "name": "Erdberren", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2004", "name": "Blauberren", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2005", "name": "Kiwi", "category": "Obst/Gemüse", "price": 0.35, "pack": "5"}, {"id": "2006", "name": "Wassermelone", "category": "Obst/Gemüse", "price": 1.29, "pack": "1"}, {"id": "2007", "name": "Honigmelone", "category": "Obst/Gemüse", "price": 1.99, "pack": "1"}, {"id": "2008", "name": "Pfirsich", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2009", "name": "Nekarienen", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2010", "name": "Gurke", "category": "Obst/Gemüse", "price": 0.69, "pack": "1"}, {"id": "2011", "name": "Tomaten", "category": "Obst/Gemüse", "price": 1.99, "pack": "1"}, {"id": "2012", "name": "Eisbergsalat", "category": "Obst/Gemüse", "price": 0.79, "pack": "1"}, {"id": "2013", "name": "Möhren", "category": "Obst/Gemüse", "price": 0.99, "pack": "1"}, {"id": "2014", "name": "Knoblauch", "category": "Obst/Gemüse", "price": 0.3, "pack": "1"}, {"id": "2015", "name": "Paprika", "category": "Obst/Gemüse", "price": 2.99, "pack": "1"}, {"id": "2016", "name": "Champions", "category": "Obst/Gemüse", "price": 1.99, "pack": "1"}, {"id": "2017", "name": "Kartoffeln", "category": "Obst/Gemüse", "price": 1.19, "pack": "1"}, {"id": "2018", "name": "Zwiebeln", "category": "Obst/Gemüse", "price": 0.99, "pack": "1"}, {"id": "3001", "name": "Toastbrot", "category": "Backwaren", "price": 0.79, "pack": "1"}, {"id": "3002", "name": "Schwarzbrot", "category": "Backwaren", "price": 1.49, "pack": "1"}, {"id": "3003", "name": "Schrippen", "category": "Backwaren", "price": 0.2, "pack": "5"}, {"id": "3004", "name": "Kaiserbrötchen", "category": "Backwaren", "price": 0.2, "pack": "5"}, {"id": "3005", "name": "Wellnisbrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3006", "name": "Roggenbrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3007", "name": "Sesambrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3008", "name": "Mohnbrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3009", "name": "Käsebrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3010", "name": "Chiabata", "category": "Backwaren", "price": 1.29, "pack": "1"}, {"id": "4001", "name": "Salami", "category": "Wurst/Fleischwaren", "price": 1.29, "pack": "1"}, {"id": "4002", "name": "Bierschinken", "category": "Wurst/Fleischwaren", "price": 1.19, "pack": "1"}, {"id": "4003", "name": "Leberkäse", "category": "Wurst/Fleischwaren", "price": 1.49, "pack": "1"}, {"id": "4004", "name": "Jagtwurst", "category": "Wurst/Fleischwaren", "price": 1.19, "pack": "1"}, {"id": "4005", "name": "Gesichtwurst", "category": "Wurst/Fleischwaren", "price": 1.19, "pack": "1"}, {"id": "4006", "name": "Leberwurst", "category": "Wurst/Fleischwaren", "price": 1.0, "pack": "1"}, {"id": "4007", "name": "Teewurst", "category": "Wurst/Fleischwaren", "price": 1.0, "pack": "1"}, {"id": "4008", "name": "Schinken", "category": "Wurst/Fleischwaren", "price": 1.49, "pack": "1"}, {"id": "4009", "name": "Gulasch", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4010", "name": "Roster", "category": "Wurst/Fleischwaren", "price": 2.49, "pack": "1"}, {"id": "4011", "name": "Hack", "category": "Wurst/Fleischwaren", "price": 4.49, "pack": "1"}, {"id": "4012", "name": "Steak", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4013", "name": "Schnitzel", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4014", "name": "Hähnchengeschnetzeltes", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4015", "name": "Putengeschnetzeltes", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4016", "name": "Leber", "category": "Wurst/Fleischwaren", "price": 2.5, "pack": "1"}, {"id": "5001", "name": "Gummibärchen", "category": "Süßwaren", "price": 0.99, "pack": "1"}, {"id": "5002", "name": "Vollmilchschokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5003", "name": "Weiße Schokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5004", "name": "Zartbitterschokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5005", "name": "Haselnussschokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5006", "name": "Kinderriegel", "category": "Süßwaren", "price": 1.59, "pack": "1"}, {"id": "5007", "name": "Pralinen", "category": "Süßwaren", "price": 2.49, "pack": "1"}, {"id": "5008", "name": "Kekse", "category": "Süßwaren", "price": 1.19, "pack": "4"}, {"id": "5009", "name": "Kaugummi", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "6001", "name": "Butter", "category": "Molkerreierzeugnisse", "price": 1.59, "pack": "1"}, {"id": "6002", "name": "Erdbeerjoghurt", "category": "Molkerreierzeugnisse", "price": 0.35, "pack": "4"}, {"id": "6003", "name": "Milch 1,5 % fett", "category": "Molkerreierzeugnisse", "price": 0.89, "pack": "10"}, {"id": "6004", "name": "Milch 3,5 % fett", "category": "Molkerreierzeugnisse", "price": 0.89, "pack": "10"}, {"id": "6005", "name": "Gouda", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6006", "name": "Emmentaler", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6007", "name": "Edamer", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6008", "name": "Cheddar", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6009", "name": "Quark 20 % Fett", "category": "Molkerreierzeugnisse", "price": 0.99, "pack": "1"}, {"id": "6010", "name": "Quark 40 % Fett", "category": "Molkerreierzeugnisse", "price": 0.99, "pack": "1"}]
 ;
@@ -889,11 +1038,53 @@ let searchTerm = "";
 let cart = {}; // id -> Menge in Einzel-Stück (immer Vielfaches der Verpackungsgröße)
 let given = 0;
 let ageGateCallback = null;
+let cartOrder = []; // Stack der Hinzufüge-Aktionen, für "Letzten Artikel stornieren"
+let discountPercent = 0;
+let paymentMethod = 'bar'; // 'bar' | 'karte'
+let transactions = []; // abgeschlossene Verkäufe (für Bons-Historie & Tagesabschluss)
+let txCounter = 1000;
+const sessionStart = new Date();
 
 const MWST_RATE = 0.19;
 
 function fmt(n){
   return n.toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}) + " €";
+}
+
+// ---- Kassen-Sounds (synthetisiert, kein Audio-File nötig) ----
+let audioCtx = null;
+function getAudioCtx(){
+  if (!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, duration, type, delay, gainVal){
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    const startTime = ctx.currentTime + (delay || 0);
+    gain.gain.setValueAtTime(gainVal || 0.15, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+  } catch(e){ /* Audio nicht verfügbar — Kasse funktioniert stumm weiter */ }
+}
+function playScanSound(){ tone(1300, 0.055, 'square', 0, 0.09); }
+function playErrorSound(){ tone(280, 0.13, 'sawtooth', 0, 0.12); tone(200, 0.16, 'sawtooth', 0.13, 0.12); }
+function playStornoSound(){ tone(520, 0.07, 'triangle', 0, 0.11); tone(340, 0.1, 'triangle', 0.07, 0.11); }
+function playDrawerSound(){ tone(140, 0.2, 'square', 0, 0.09); tone(90, 0.22, 'square', 0.05, 0.07); }
+function playCashSound(){
+  tone(660, 0.09, 'sine', 0, 0.14);
+  tone(880, 0.09, 'sine', 0.08, 0.14);
+  tone(1320, 0.18, 'sine', 0.16, 0.16);
+  playDrawerSound();
 }
 
 // ---- clock ----
@@ -933,6 +1124,40 @@ quickAmounts.forEach(a => {
     renderSummary();
   };
   qc.appendChild(b);
+});
+
+// ---- Rabatt-Chips ----
+const discountOptions = [0, 5, 10, 20];
+const dc = document.getElementById('discountChips');
+discountOptions.forEach(pct => {
+  const b = document.createElement('button');
+  b.textContent = pct === 0 ? 'Kein' : pct + ' %';
+  b.className = pct === 0 ? 'active' : '';
+  b.dataset.pct = pct;
+  b.onclick = () => {
+    discountPercent = pct;
+    document.querySelectorAll('.discount-chips button').forEach(x => x.classList.toggle('active', Number(x.dataset.pct) === pct));
+    renderSummary();
+  };
+  dc.appendChild(b);
+});
+
+// ---- Zahlungsart Bar / Karte ----
+document.querySelectorAll('.pm-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    paymentMethod = b.dataset.method;
+    document.querySelectorAll('.pm-btn').forEach(x => x.classList.toggle('active', x.dataset.method === paymentMethod));
+    renderSummary();
+  });
+});
+
+// ---- Letzten Artikel stornieren ----
+document.getElementById('undoBtn').addEventListener('click', undoLastItem);
+
+// ---- Kassenlade ohne Verkauf öffnen ----
+document.getElementById('drawerBtn').addEventListener('click', () => {
+  playDrawerSound();
+  showToast('Kassenlade geöffnet (ohne Verkauf).');
 });
 
 // ---- product grid ----
@@ -979,12 +1204,15 @@ function addToCart(id){
   const p = PRODUCTS.find(x => x.id === id);
   const pack = packSize(p);
   if (stock[id] < pack){
+    playErrorSound();
     showToast(`Nicht genug Bestand für ein volles Gebinde von ${p.name} (${pack} Stk. nötig).`);
     return;
   }
   const commit = () => {
     cart[id] = (cart[id] || 0) + pack;
     stock[id] -= pack;
+    cartOrder.push({id, units: pack});
+    playScanSound();
     renderAll();
   };
   if (ALCOHOL_IDS.has(id)){
@@ -999,12 +1227,22 @@ function changeQty(id, deltaPacks){
   const pack = packSize(p);
   const deltaUnits = deltaPacks * pack;
   if (deltaUnits > 0 && stock[id] < deltaUnits){
+    playErrorSound();
     showToast('Kein weiterer Bestand für ein volles Gebinde.');
     return;
   }
   const apply = () => {
     cart[id] += deltaUnits;
     stock[id] -= deltaUnits;
+    if (deltaUnits > 0){
+      cartOrder.push({id, units: deltaUnits});
+      playScanSound();
+    } else {
+      for (let i = cartOrder.length - 1; i >= 0; i--){
+        if (cartOrder[i].id === id){ cartOrder.splice(i, 1); break; }
+      }
+      playStornoSound();
+    }
     if (cart[id] <= 0){
       delete cart[id];
     }
@@ -1020,6 +1258,23 @@ function changeQty(id, deltaPacks){
 function removeItem(id){
   stock[id] += cart[id];
   delete cart[id];
+  cartOrder = cartOrder.filter(o => o.id !== id);
+  playStornoSound();
+  renderAll();
+}
+
+function undoLastItem(){
+  if (cartOrder.length === 0){
+    showToast('Nichts zu stornieren.');
+    return;
+  }
+  const last = cartOrder.pop();
+  cart[last.id] -= last.units;
+  stock[last.id] += last.units;
+  if (cart[last.id] <= 0) delete cart[last.id];
+  playStornoSound();
+  const p = PRODUCTS.find(x => x.id === last.id);
+  showToast(`Storniert: ${p.name}`);
   renderAll();
 }
 
@@ -1027,6 +1282,7 @@ function renderCart(){
   const list = document.getElementById('cartList');
   const ids = Object.keys(cart);
   document.getElementById('itemCount').textContent = ids.reduce((s,id)=>s+cart[id],0) + " Stück";
+  document.getElementById('undoBtn').disabled = cartOrder.length === 0;
   if (ids.length === 0){
     list.innerHTML = '<div class="cart-empty">Warenkorb leer.<br>Artikel antippen oder Nummer scannen.</div>';
     return;
@@ -1056,7 +1312,7 @@ function renderCart(){
         <button data-act="plus">+</button>
       </div>
       <div class="ci-line">${fmt(line)}</div>
-      <div class="ci-remove">Entfernen</div>
+      <div class="ci-remove">Stornieren</div>
     `;
     div.querySelector('[data-act="minus"]').onclick = () => changeQty(id, -1);
     div.querySelector('[data-act="plus"]').onclick = () => changeQty(id, 1);
@@ -1066,21 +1322,31 @@ function renderCart(){
 }
 
 function calcTotals(){
-  let brutto = 0;
+  let bruttoVorRabatt = 0;
   Object.keys(cart).forEach(id => {
     const p = PRODUCTS.find(x => x.id === id);
-    brutto += p.price * cart[id];
+    bruttoVorRabatt += p.price * cart[id];
   });
+  const discountAmount = bruttoVorRabatt * (discountPercent / 100);
+  const brutto = bruttoVorRabatt - discountAmount;
   const netto = brutto / (1 + MWST_RATE);
   const mwst = brutto - netto;
-  return {brutto, netto, mwst};
+  return {brutto, netto, mwst, bruttoVorRabatt, discountAmount};
 }
 
 function renderSummary(){
-  const {brutto, netto, mwst} = calcTotals();
+  const {brutto, netto, mwst, discountAmount} = calcTotals();
   document.getElementById('sumNetto').textContent = fmt(netto);
   document.getElementById('sumMwst').textContent = fmt(mwst);
   document.getElementById('sumBrutto').textContent = fmt(brutto);
+
+  const discountRow = document.getElementById('discountRow');
+  if (discountAmount > 0){
+    discountRow.style.display = 'flex';
+    document.getElementById('sumDiscount').textContent = '−' + fmt(discountAmount);
+  } else {
+    discountRow.style.display = 'none';
+  }
 
   const totalDisplay = document.getElementById('totalDisplay');
   totalDisplay.textContent = fmt(brutto);
@@ -1088,13 +1354,23 @@ function renderSummary(){
   void totalDisplay.offsetWidth;
   totalDisplay.classList.add('flash');
 
-  const change = given - brutto;
-  const changeEl = document.getElementById('changeVal');
-  changeEl.textContent = fmt(Math.abs(change));
-  changeEl.classList.toggle('neg', change < 0);
-
   const payBtn = document.getElementById('payBtn');
-  payBtn.disabled = !(brutto > 0 && given >= brutto);
+
+  if (paymentMethod === 'karte'){
+    document.getElementById('givenRow').style.display = 'none';
+    document.getElementById('quickCash').style.display = 'none';
+    document.getElementById('changeRow').style.display = 'none';
+    payBtn.disabled = !(brutto > 0);
+  } else {
+    document.getElementById('givenRow').style.display = 'flex';
+    document.getElementById('quickCash').style.display = 'flex';
+    document.getElementById('changeRow').style.display = 'flex';
+    const change = given - brutto;
+    const changeEl = document.getElementById('changeVal');
+    changeEl.textContent = fmt(Math.abs(change));
+    changeEl.classList.toggle('neg', change < 0);
+    payBtn.disabled = !(brutto > 0 && given >= brutto);
+  }
 }
 
 function renderAll(){
@@ -1117,6 +1393,7 @@ document.getElementById('scanInput').addEventListener('keydown', e => {
       addToCart(id);
       e.target.value = '';
     } else if (id) {
+      playErrorSound();
       showToast('Unbekannte Artikelnummer: ' + id);
       e.target.value = '';
     }
@@ -1130,48 +1407,86 @@ document.getElementById('givenInput').addEventListener('input', e => {
   renderSummary();
 });
 
-// ---- clear ----
+// ---- Storno (kompletter Warenkorb) ----
 document.getElementById('clearBtn').addEventListener('click', () => {
+  if (Object.keys(cart).length === 0) return;
   Object.keys(cart).forEach(id => { stock[id] += cart[id]; });
   cart = {};
+  cartOrder = [];
   given = 0;
+  discountPercent = 0;
+  document.querySelectorAll('.discount-chips button').forEach(x => x.classList.toggle('active', Number(x.dataset.pct) === 0));
   document.getElementById('givenInput').value = '';
+  playStornoSound();
+  showToast('Warenkorb storniert.');
   renderAll();
 });
 
-// ---- pay ----
-document.getElementById('payBtn').addEventListener('click', () => {
-  const {brutto, netto, mwst} = calcTotals();
-  const change = given - brutto;
-  const now = new Date();
-
+function buildReceiptHtml(tx){
   let html = `
     <h2>MARKT/24</h2>
-    <div class="sub">Kasse 03 · Bon Nr. ${Math.floor(1000+Math.random()*8999)}<br>${now.toLocaleDateString('de-DE')} ${now.toLocaleTimeString('de-DE')}</div>
+    <div class="sub">Kasse 03 · Bon Nr. ${tx.id}${tx.voided ? ' · <strong style="color:#c0392b">STORNIERT</strong>' : ''}<br>${tx.date} ${tx.time}</div>
     <hr>
   `;
-  Object.keys(cart).forEach(id => {
-    const p = PRODUCTS.find(x => x.id === id);
-    const qty = cart[id];
-    html += `<div class="receipt-line"><span class="rname">${qty}× ${p.name}</span><span>${fmt(p.price*qty)}</span></div>`;
+  tx.items.forEach(it => {
+    html += `<div class="receipt-line"><span class="rname">${it.qty}× ${it.name}</span><span>${fmt(it.price * it.qty)}</span></div>`;
   });
+  html += `<hr>`;
+  if (tx.discountAmount > 0){
+    html += `<div class="receipt-line"><span>Zwischensumme</span><span>${fmt(tx.bruttoVorRabatt)}</span></div>`;
+    html += `<div class="receipt-line"><span>Rabatt (${tx.discountPercent}%)</span><span>−${fmt(tx.discountAmount)}</span></div>`;
+  }
   html += `
+    <div class="receipt-line"><span>Nettobetrag</span><span>${fmt(tx.netto)}</span></div>
+    <div class="receipt-line"><span>MwSt 19%</span><span>${fmt(tx.mwst)}</span></div>
+    <div class="rtotal"><span>Bruttobetrag</span><span>${fmt(tx.brutto)}</span></div>
     <hr>
-    <div class="receipt-line"><span>Nettobetrag</span><span>${fmt(netto)}</span></div>
-    <div class="receipt-line"><span>MwSt 19%</span><span>${fmt(mwst)}</span></div>
-    <div class="rtotal"><span>Bruttobetrag</span><span>${fmt(brutto)}</span></div>
-    <hr>
-    <div class="receipt-line"><span>Gegeben</span><span>${fmt(given)}</span></div>
-    <div class="receipt-line"><span>Rückgeld</span><span>${fmt(change)}</span></div>
-    <div class="rfoot">Danke für Ihren Einkauf!<br>MARKT/24 · Kundenservice: 0800 / 24 24 24</div>
-    <button class="receipt-close" id="closeReceipt">Neuer Kunde</button>
+    <div class="receipt-line"><span>Zahlart</span><span>${tx.method === 'karte' ? 'Karte' : 'Bar'}</span></div>
   `;
-  document.getElementById('receiptBody').innerHTML = html;
+  if (tx.method === 'bar'){
+    html += `
+      <div class="receipt-line"><span>Gegeben</span><span>${fmt(tx.given)}</span></div>
+      <div class="receipt-line"><span>Rückgeld</span><span>${fmt(tx.change)}</span></div>
+    `;
+  }
+  html += `<div class="rfoot">Danke für Ihren Einkauf!<br>MARKT/24 · Kundenservice: 0800 / 24 24 24</div>`;
+  return html;
+}
+
+// ---- pay ----
+document.getElementById('payBtn').addEventListener('click', () => {
+  const {brutto, netto, mwst, bruttoVorRabatt, discountAmount} = calcTotals();
+  const change = paymentMethod === 'bar' ? (given - brutto) : 0;
+  const now = new Date();
+  txCounter += 1;
+
+  const tx = {
+    id: txCounter,
+    date: now.toLocaleDateString('de-DE'),
+    time: now.toLocaleTimeString('de-DE'),
+    items: Object.keys(cart).map(id => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return {id, name: p.name, qty: cart[id], price: p.price};
+    }),
+    netto, mwst, brutto, bruttoVorRabatt, discountAmount,
+    discountPercent, method: paymentMethod,
+    given: paymentMethod === 'bar' ? given : brutto,
+    change,
+    voided: false
+  };
+  transactions.push(tx);
+
+  playCashSound();
+  document.getElementById('receiptBody').innerHTML = buildReceiptHtml(tx) +
+    '<button class="receipt-close" id="closeReceipt">Neuer Kunde</button>';
   document.getElementById('overlay').classList.add('show');
   document.getElementById('closeReceipt').onclick = () => {
     document.getElementById('overlay').classList.remove('show');
     cart = {};
+    cartOrder = [];
     given = 0;
+    discountPercent = 0;
+    document.querySelectorAll('.discount-chips button').forEach(x => x.classList.toggle('active', Number(x.dataset.pct) === 0));
     document.getElementById('givenInput').value = '';
     renderAll();
   };
@@ -1250,7 +1565,98 @@ document.getElementById('ageYesBtn').addEventListener('click', () => {
 document.getElementById('ageNoBtn').addEventListener('click', () => {
   document.getElementById('ageOverlay').classList.remove('show');
   ageGateCallback = null;
+  playErrorSound();
   showToast('Verkauf abgelehnt — Mindestalter 18 nicht bestätigt.');
+});
+
+// ---- Bons-Historie & Storno abgeschlossener Verkäufe ----
+function renderBonsTable(){
+  const wrap = document.getElementById('bonsTable');
+  wrap.innerHTML = '';
+  if (transactions.length === 0){
+    wrap.innerHTML = '<div class="bons-empty">Noch keine Verkäufe in dieser Sitzung.</div>';
+    return;
+  }
+  transactions.slice().reverse().forEach(tx => {
+    const row = document.createElement('div');
+    row.className = 'bons-row';
+    row.innerHTML = `
+      <div class="bnr">#${tx.id}</div>
+      <div class="btime">${tx.date}<br>${tx.time}</div>
+      <div class="bamt">${fmt(tx.brutto)}</div>
+      <div class="bstatus ${tx.voided ? 'void' : 'paid'}">${tx.voided ? 'Storniert' : (tx.method === 'karte' ? 'Karte' : 'Bar')}</div>
+      <div class="bactions">
+        <button data-act="view">Anzeigen</button>
+        ${tx.voided ? '' : '<button data-act="void" class="void-btn">Stornieren</button>'}
+      </div>
+    `;
+    row.querySelector('[data-act="view"]').onclick = () => {
+      document.getElementById('receiptBody').innerHTML = buildReceiptHtml(tx) +
+        '<button class="receipt-close" id="closeReceipt2">Schließen</button>';
+      document.getElementById('overlay').classList.add('show');
+      document.getElementById('closeReceipt2').onclick = () => {
+        document.getElementById('overlay').classList.remove('show');
+      };
+    };
+    const voidBtn = row.querySelector('[data-act="void"]');
+    if (voidBtn){
+      voidBtn.onclick = () => {
+        tx.items.forEach(it => { stock[it.id] += it.qty; });
+        tx.voided = true;
+        playStornoSound();
+        showToast(`Bon #${tx.id} storniert — Ware wieder eingebucht.`);
+        renderBonsTable();
+        renderGrid();
+      };
+    }
+    wrap.appendChild(row);
+  });
+}
+
+document.getElementById('bonsBtn').addEventListener('click', () => {
+  renderBonsTable();
+  document.getElementById('bonsOverlay').classList.add('show');
+});
+document.getElementById('bonsCloseBtn').addEventListener('click', () => {
+  document.getElementById('bonsOverlay').classList.remove('show');
+});
+
+// ---- Tagesabschluss / Z-Bericht ----
+document.getElementById('reportBtn').addEventListener('click', () => {
+  const valid = transactions.filter(t => !t.voided);
+  const voided = transactions.filter(t => t.voided);
+  const bar = valid.filter(t => t.method === 'bar');
+  const karte = valid.filter(t => t.method === 'karte');
+  const sum = arr => arr.reduce((s,t) => s + t.brutto, 0);
+  const sumNetto = arr => arr.reduce((s,t) => s + t.netto, 0);
+  const sumMwst = arr => arr.reduce((s,t) => s + t.mwst, 0);
+  const sumDisc = arr => arr.reduce((s,t) => s + t.discountAmount, 0);
+  const now = new Date();
+
+  const html = `
+    <h2>Z-BERICHT</h2>
+    <div class="sub">Kasse 03 · Tagesabschluss<br>Kassenstart ${sessionStart.toLocaleTimeString('de-DE')} · Stand ${now.toLocaleTimeString('de-DE')}</div>
+    <hr>
+    <div class="receipt-line"><span>Verkäufe (gültig)</span><span>${valid.length}</span></div>
+    <div class="receipt-line"><span>davon Bar</span><span>${bar.length}</span></div>
+    <div class="receipt-line"><span>davon Karte</span><span>${karte.length}</span></div>
+    <div class="receipt-line"><span>Stornierte Bons</span><span>${voided.length}</span></div>
+    <hr>
+    <div class="receipt-line"><span>Nettoumsatz</span><span>${fmt(sumNetto(valid))}</span></div>
+    <div class="receipt-line"><span>MwSt-Summe</span><span>${fmt(sumMwst(valid))}</span></div>
+    <div class="receipt-line"><span>Gewährte Rabatte</span><span>−${fmt(sumDisc(valid))}</span></div>
+    <div class="rtotal"><span>Bruttoumsatz</span><span>${fmt(sum(valid))}</span></div>
+    <hr>
+    <div class="receipt-line"><span>davon Bar-Umsatz</span><span>${fmt(sum(bar))}</span></div>
+    <div class="receipt-line"><span>davon Karten-Umsatz</span><span>${fmt(sum(karte))}</span></div>
+    <div class="rfoot">Kasse 03 · MARKT/24<br>Dieser Bericht schließt den Kassenzeitraum nicht ab.</div>
+    <button class="receipt-close" id="closeReportBtn">Schließen</button>
+  `;
+  document.getElementById('reportBody').innerHTML = html;
+  document.getElementById('reportOverlay').classList.add('show');
+  document.getElementById('closeReportBtn').onclick = () => {
+    document.getElementById('reportOverlay').classList.remove('show');
+  };
 });
 
 // ---- toast ----
