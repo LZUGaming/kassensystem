@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>MARKT/24 Kassensystem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=Dseg7+Classic&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'DSEG7';
+  src: local('DSEG7 Classic');
+}
+:root{
+  --bg: #14181d;
+  --panel: #1c2128;
+  --panel-2: #22272f;
+  --line: #2c333d;
+  --text: #eef1f4;
+  --muted: #8a94a3;
+  --amber: #ffb020;
+  --amber-dim: #7a5a1a;
+  --teal: #3fd6c0;
+  --red: #ff6b5e;
+  --green: #59d67c;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{
+  height:100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family:'Inter',sans-serif;
+  overflow:hidden;
+}
+#app{
+  display:grid;
+  grid-template-columns: 78px 1fr 360px;
+  grid-template-rows: 64px 1fr;
+  height:100vh;
+  width:100vw;
+}
+
+/* ===== HEADER ===== */
+.header{
+  grid-column: 1 / 4;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 0 20px;
+  background: var(--panel);
+  border-bottom:1px solid var(--line);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.brand .dot{
+  width:10px;height:10px;border-radius:50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite ease-in-out;
+}
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
+.brand h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:17px;
+  letter-spacing:1px;
+  font-weight:700;
+}
+.brand span{ color: var(--amber); }
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  font-size:12px;
+  color: var(--muted);
+}
+.clock{
+  font-family:'Space Grotesk',sans-serif;
+  color: var(--text);
+  font-size:14px;
+}
+.kasse-id{
+  padding:4px 10px;
+  border:1px solid var(--line);
+  border-radius: 4px;
+  font-size:11px;
+  letter-spacing:.5px;
+}
+.lager-btn{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--text);
+  padding:7px 13px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.lager-btn:hover{ border-color: var(--teal); }
+
+/* ===== SIDEBAR (categories) ===== */
+.sidebar{
+  background: var(--panel);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding: 14px 0;
+  gap: 6px;
+  overflow-y:auto;
+}
+.cat-btn{
+  width:58px;
+  height:58px;
+  border-radius:12px;
+  background: transparent;
+  border:1px solid transparent;
+  color: var(--muted);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  cursor:pointer;
+  font-size:9px;
+  font-weight:600;
+  letter-spacing:.3px;
+  text-align:center;
+  line-height:1.15;
+  transition: all .15s ease;
+}
+.cat-btn .icon{ font-size:20px; }
+.cat-btn:hover{ background: var(--panel-2); color: var(--text); }
+.cat-btn.active{
+  background: rgba(255,176,32,0.12);
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+/* ===== MAIN: product grid ===== */
+.main{
+  padding: 16px 18px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.search-row{
+  display:flex;
+  gap:10px;
+}
+.search-box{
+  flex:1;
+  position:relative;
+}
+.search-box input{
+  width:100%;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding: 12px 14px 12px 38px;
+  color: var(--text);
+  font-size:14px;
+  outline:none;
+  font-family:'Inter',sans-serif;
+}
+.search-box input:focus{ border-color: var(--teal); }
+.search-box::before{
+  content:"⌕";
+  position:absolute;
+  left:13px; top:50%;
+  transform:translateY(-50%);
+  color: var(--muted);
+  font-size:16px;
+}
+.scan-input{
+  width:220px;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding: 12px 14px;
+  color: var(--amber);
+  font-family:'Space Grotesk',sans-serif;
+  font-size:14px;
+  outline:none;
+}
+.scan-input::placeholder{ color: var(--muted); font-family:'Inter',sans-serif; }
+.scan-input:focus{ border-color: var(--amber); }
+
+.cat-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:13px;
+  color: var(--muted);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding-left:2px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap:10px;
+}
+.product{
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 10px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  transition: transform .1s ease, border-color .15s ease, background .15s ease;
+  position:relative;
+  overflow:hidden;
+}
+.product:hover{ border-color: var(--teal); transform: translateY(-2px); }
+.product:active{ transform: translateY(0px) scale(.97); }
+.product.low::after{
+  content:"";
+  position:absolute; top:8px; right:8px;
+  width:7px;height:7px;border-radius:50%;
+  background: var(--red);
+  box-shadow:0 0 6px var(--red);
+}
+.product.alcohol{ border-color: rgba(255,107,94,0.35); }
+.age-badge{
+  position:absolute;
+  top:8px; left:8px;
+  background: var(--red);
+  color:#2a0603;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:5px;
+  letter-spacing:.3px;
+}
+.product .pname{
+  font-size:12.5px;
+  font-weight:600;
+  line-height:1.25;
+  min-height: 32px;
+}
+.product .pmeta{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+}
+.product .pprice{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  color: var(--teal);
+  font-size:14px;
+}
+.product .pstock{
+  font-size:10px;
+  color: var(--muted);
+}
+.product .pid{
+  font-size:9px;
+  color: var(--muted);
+  letter-spacing:.5px;
+}
+.no-results{
+  color: var(--muted);
+  font-size:13px;
+  padding:30px 0;
+  text-align:center;
+}
+
+/* ===== CART / RECEIPT PANEL ===== */
+.cart-panel{
+  background: var(--panel);
+  border-left:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  overflow:hidden;
+}
+.display{
+  background: #0c0f13;
+  margin: 14px 14px 0 14px;
+  border-radius: 12px;
+  padding: 16px 18px;
+  border:1px solid var(--line);
+  box-shadow: inset 0 0 20px rgba(0,0,0,.5);
+}
+.display .label{
+  font-size:10px;
+  letter-spacing:2px;
+  color: var(--amber-dim);
+  text-transform:uppercase;
+  margin-bottom:2px;
+}
+.display .total-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:38px;
+  color: var(--amber);
+  text-shadow: 0 0 12px rgba(255,176,32,.55), 0 0 2px rgba(255,176,32,.8);
+  letter-spacing:1px;
+  transition: text-shadow .15s ease;
+  font-variant-numeric: tabular-nums;
+}
+.display .total-num.flash{
+  animation: flash .25s ease;
+}
+@keyframes flash{
+  0%{ text-shadow: 0 0 26px rgba(255,176,32,1), 0 0 6px rgba(255,176,32,1); }
+  100%{ text-shadow: 0 0 12px rgba(255,176,32,.55), 0 0 2px rgba(255,176,32,.8); }
+}
+
+.cart-list{
+  flex:1;
+  overflow-y:auto;
+  padding: 12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.cart-empty{
+  color: var(--muted);
+  font-size:13px;
+  text-align:center;
+  padding: 40px 10px;
+  line-height:1.5;
+}
+.cart-item{
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  align-items:center;
+  gap:8px;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border-radius:8px;
+  font-size:12.5px;
+}
+.cart-item .ci-name{
+  font-weight:600;
+  line-height:1.2;
+}
+.ci-age{
+  display:inline-block;
+  background: var(--red);
+  color:#2a0603;
+  font-size:9px;
+  font-weight:700;
+  padding:1px 5px;
+  border-radius:4px;
+  vertical-align:middle;
+  margin-left:4px;
+}
+.cart-item .ci-sub{
+  font-size:10.5px;
+  color: var(--muted);
+}
+.cart-item .ci-qty{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background: var(--bg);
+  border-radius:6px;
+  padding: 3px 6px;
+}
+.cart-item .ci-qty button{
+  width:18px;height:18px;
+  border-radius:4px;
+  border:none;
+  background: var(--line);
+  color: var(--text);
+  cursor:pointer;
+  font-size:12px;
+  line-height:1;
+}
+.cart-item .ci-qty button:hover{ background: var(--teal); color:#06201c; }
+.cart-item .ci-line{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  color: var(--text);
+  text-align:right;
+  min-width:52px;
+}
+.ci-remove{
+  grid-column: 1/4;
+  text-align:right;
+  font-size:10px;
+  color: var(--red);
+  cursor:pointer;
+  opacity:.75;
+}
+.ci-remove:hover{ opacity:1; text-decoration:underline; }
+
+.summary{
+  border-top:1px solid var(--line);
+  padding: 12px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  font-size:12.5px;
+}
+.summary .row{
+  display:flex;
+  justify-content:space-between;
+  color: var(--muted);
+}
+.summary .row.total{
+  color: var(--text);
+  font-weight:700;
+  font-size:15px;
+  padding-top:6px;
+  border-top:1px dashed var(--line);
+  margin-top:4px;
+}
+.summary .row.total .val{ color: var(--amber); font-family:'Space Grotesk',sans-serif; }
+
+.pay-area{
+  padding: 12px 16px 16px 16px;
+  border-top:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.pay-row{
+  display:flex;
+  gap:8px;
+}
+.pay-row input{
+  flex:1;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:10px 10px;
+  color: var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  font-size:14px;
+  outline:none;
+  text-align:right;
+}
+.pay-row input:focus{ border-color: var(--amber); }
+.quick-cash{
+  display:flex;
+  gap:6px;
+}
+.quick-cash button{
+  flex:1;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  color: var(--muted);
+  padding: 7px 0;
+  font-size:11.5px;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.quick-cash button:hover{ border-color: var(--teal); color: var(--text); }
+
+.change-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 8px 2px 2px 2px;
+  font-size:13px;
+  color: var(--muted);
+}
+.change-row .val{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:16px;
+  color: var(--green);
+}
+.change-row .val.neg{ color: var(--red); }
+
+.actions{
+  display:flex;
+  gap:8px;
+}
+.btn{
+  flex:1;
+  padding: 12px 0;
+  border-radius:10px;
+  border:none;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.3px;
+  cursor:pointer;
+  transition: filter .12s ease;
+}
+.btn:hover{ filter:brightness(1.12); }
+.btn:disabled{ opacity:.35; cursor:not-allowed; filter:none; }
+.btn-clear{
+  background: var(--panel-2);
+  color: var(--muted);
+  flex: 0 0 74px;
+}
+.btn-pay{
+  background: var(--amber);
+  color: #241a06;
+  flex:1;
+}
+
+/* ===== RECEIPT OVERLAY ===== */
+.overlay{
+  position:fixed; inset:0;
+  background: rgba(0,0,0,.6);
+  display:flex; align-items:center; justify-content:center;
+  z-index: 50;
+  opacity:0; pointer-events:none;
+  transition: opacity .2s ease;
+}
+.overlay.show{ opacity:1; pointer-events:all; }
+.receipt{
+  width: 300px;
+  max-height: 82vh;
+  overflow-y:auto;
+  background: #f4f1ea;
+  color: #1b1b1b;
+  font-family: 'Space Grotesk', monospace;
+  padding: 22px 20px 26px 20px;
+  border-radius: 3px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  transform: translateY(0);
+  animation: dropIn .35s cubic-bezier(.2,.9,.25,1);
+}
+@keyframes dropIn{
+  0%{ transform: translateY(-30px); opacity:0; }
+  100%{ transform: translateY(0); opacity:1; }
+}
+.receipt h2{
+  text-align:center;
+  font-size:16px;
+  letter-spacing:2px;
+  margin-bottom:2px;
+}
+.receipt .sub{
+  text-align:center;
+  font-size:10px;
+  color:#555;
+  margin-bottom:14px;
+}
+.receipt-line{
+  display:flex;
+  justify-content:space-between;
+  font-size:11.5px;
+  margin-bottom:3px;
+}
+.receipt-line .rname{ flex:1; padding-right:8px; }
+.receipt hr{
+  border:none;
+  border-top:1px dashed #999;
+  margin: 10px 0;
+}
+.receipt .rtotal{
+  display:flex;
+  justify-content:space-between;
+  font-weight:700;
+  font-size:14px;
+  margin-top:6px;
+}
+.receipt .rfoot{
+  text-align:center;
+  font-size:10px;
+  color:#555;
+  margin-top:16px;
+  line-height:1.6;
+}
+.receipt-close{
+  display:block;
+  width:100%;
+  margin-top:16px;
+  padding:11px 0;
+  background:#1b1b1b;
+  color:#f4f1ea;
+  border:none;
+  border-radius:4px;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.lager-panel{
+  width: 620px;
+  max-height: 82vh;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius: 14px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  animation: dropIn .25s cubic-bezier(.2,.9,.25,1);
+}
+.lager-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 16px 18px;
+  border-bottom:1px solid var(--line);
+}
+.lager-head h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:16px;
+  letter-spacing:.5px;
+}
+.lager-head button{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--muted);
+  width:28px; height:28px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:13px;
+}
+.lager-head button:hover{ color: var(--text); border-color: var(--red); }
+.lager-searchrow{ padding: 12px 18px 0 18px; }
+.lager-searchrow input{
+  width:100%;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-size:13px;
+  outline:none;
+  font-family:'Inter',sans-serif;
+}
+.lager-searchrow input:focus{ border-color: var(--teal); }
+.lager-table-wrap{
+  overflow-y:auto;
+  padding: 12px 18px 18px 18px;
+}
+.lager-table-head{
+  display:grid;
+  grid-template-columns: 2fr 0.7fr 0.8fr 1fr 1.3fr;
+  gap:8px;
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-bottom:1px solid var(--line);
+  position:sticky; top:0;
+  background: var(--panel);
+}
+.lager-row{
+  display:grid;
+  grid-template-columns: 2fr 0.7fr 0.8fr 1fr 1.3fr;
+  gap:8px;
+  align-items:center;
+  padding: 8px 8px;
+  border-bottom:1px solid var(--line);
+  font-size:12.5px;
+}
+.lager-row .lname{ font-weight:600; }
+.lager-row .lid{ color: var(--muted); font-size:11px; }
+.lager-row .lstock{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+}
+.lager-row .lstock.low{ color: var(--red); }
+.lager-row .lstock.ok{ color: var(--green); }
+.lager-row .lmelde{ color: var(--muted); font-size:11.5px; }
+.lager-row .lzugang{
+  display:flex;
+  gap:6px;
+}
+.lager-row .lzugang input{
+  width:52px;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:5px 6px;
+  color: var(--text);
+  font-size:12px;
+  text-align:center;
+  outline:none;
+}
+.lager-row .lzugang input:focus{ border-color: var(--amber); }
+.lager-row .lzugang button{
+  background: rgba(89,214,124,0.12);
+  border:1px solid var(--green);
+  color: var(--green);
+  border-radius:6px;
+  padding: 5px 10px;
+  font-size:11.5px;
+  font-weight:700;
+  cursor:pointer;
+}
+.lager-row .lzugang button:hover{ filter:brightness(1.2); }
+.lager-row.just-added{
+  animation: rowFlash .8s ease;
+}
+@keyframes rowFlash{
+  0%{ background: rgba(89,214,124,0.18); }
+  100%{ background: transparent; }
+}
+
+.toast{
+  position:fixed;
+  bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background: var(--panel-2);
+  border:1px solid var(--red);
+  color: var(--text);
+  padding:10px 18px;
+  border-radius:8px;
+  font-size:12.5px;
+  opacity:0;
+  pointer-events:none;
+  transition: all .2s ease;
+  z-index:60;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+.age-panel{
+  width: 340px;
+  background: var(--panel);
+  border:1px solid var(--red);
+  border-radius: 14px;
+  padding: 28px 26px 24px 26px;
+  text-align:center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  animation: dropIn .25s cubic-bezier(.2,.9,.25,1);
+}
+.age-icon{ font-size:36px; margin-bottom:8px; }
+.age-panel h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:17px;
+  margin-bottom:10px;
+}
+.age-panel p{
+  font-size:13px;
+  color: var(--muted);
+  line-height:1.5;
+  margin-bottom:20px;
+}
+.age-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.age-actions button{
+  padding:11px 0;
+  border-radius:9px;
+  border:none;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+}
+.age-yes{
+  background: var(--green);
+  color:#06210f;
+}
+.age-yes:hover{ filter:brightness(1.1); }
+.age-no{
+  background: var(--panel-2);
+  border:1px solid var(--line) !important;
+  color: var(--text);
+}
+.age-no:hover{ border-color: var(--red) !important; }
+
+::-webkit-scrollbar{ width:8px; height:8px; }
+::-webkit-scrollbar-thumb{ background: var(--line); border-radius:4px; }
+::-webkit-scrollbar-track{ background: transparent; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="brand">
+      <div class="dot"></div>
+      <h1>MARKT<span>/24</span> · KASSE 03</h1>
+    </div>
+    <div class="header-right">
+      <button class="lager-btn" id="lagerBtn">📦 Lager</button>
+      <div class="kasse-id" id="itemCount">0 Artikel</div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </div>
+
+  <div class="sidebar" id="sidebar"></div>
+
+  <div class="main">
+    <div class="search-row">
+      <div class="search-box">
+        <input id="searchInput" type="text" placeholder="Artikel suchen…" autocomplete="off">
+      </div>
+      <input class="scan-input" id="scanInput" type="text" placeholder="Artikelnr. scannen + ⏎" autocomplete="off">
+    </div>
+    <div class="cat-title" id="catTitle">Alle Warengruppen</div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="cart-panel">
+    <div class="display">
+      <div class="label">Zu zahlen</div>
+      <div class="total-num" id="totalDisplay">0,00 €</div>
+    </div>
+    <div class="cart-list" id="cartList">
+      <div class="cart-empty">Warenkorb leer.<br>Artikel antippen oder Nummer scannen.</div>
+    </div>
+    <div class="summary">
+      <div class="row"><span>Nettobetrag</span><span id="sumNetto">0,00 €</span></div>
+      <div class="row"><span>MwSt (19%)</span><span id="sumMwst">0,00 €</span></div>
+      <div class="row total"><span>Bruttobetrag</span><span class="val" id="sumBrutto">0,00 €</span></div>
+    </div>
+    <div class="pay-area">
+      <div class="pay-row">
+        <input id="givenInput" type="text" inputmode="decimal" placeholder="Gegeben (€)">
+      </div>
+      <div class="quick-cash" id="quickCash"></div>
+      <div class="change-row"><span>Rückgeld</span><span class="val" id="changeVal">0,00 €</span></div>
+      <div class="actions">
+        <button class="btn btn-clear" id="clearBtn">Leeren</button>
+        <button class="btn btn-pay" id="payBtn" disabled>Zahlung abschließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="receipt" id="receiptBody"></div>
+</div>
+
+<div class="overlay" id="lagerOverlay">
+  <div class="lager-panel">
+    <div class="lager-head">
+      <h2>Wareneingang</h2>
+      <button id="lagerCloseBtn">✕</button>
+    </div>
+    <div class="lager-searchrow">
+      <input id="lagerSearch" type="text" placeholder="Artikel oder Nummer suchen…" autocomplete="off">
+    </div>
+    <div class="lager-table-wrap">
+      <div class="lager-table-head">
+        <span>Artikel</span><span>Nr.</span><span>Bestand</span><span>Meldebestand</span><span>Zugang buchen</span>
+      </div>
+      <div id="lagerTable"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ageOverlay">
+  <div class="age-panel">
+    <div class="age-icon">🔞</div>
+    <h2>Alterskontrolle</h2>
+    <p id="ageText">Dieser Artikel enthält Alkohol.</p>
+    <div class="age-actions">
+      <button class="age-no" id="ageNoBtn">Nein / Abbrechen</button>
+      <button class="age-yes" id="ageYesBtn">Ja, 18 Jahre oder älter</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PRODUCTS = [{"id": "1001", "name": "Wasser Still", "category": "Getränk", "price": 0.25, "pack": "6"}, {"id": "1002", "name": "Wasser Medium", "category": "Getränk", "price": 0.25, "pack": "6"}, {"id": "1003", "name": "Wasser spritzig", "category": "Getränk", "price": 0.25, "pack": "6"}, {"id": "1004", "name": "Cola Pur", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1005", "name": "Cola Zero", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1006", "name": "Cola Light", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1007", "name": "Cola Normal", "category": "Getränk", "price": 1.15, "pack": "6"}, {"id": "1008", "name": "Limonade Orange", "category": "Getränk", "price": 0.85, "pack": "6"}, {"id": "1009", "name": "Limonade Zitrone", "category": "Getränk", "price": 0.85, "pack": "6"}, {"id": "1010", "name": "Limonade Waldmeister", "category": "Getränk", "price": 0.85, "pack": "6"}, {"id": "1011", "name": "Orangensaft", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1012", "name": "Orangensaft light", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1013", "name": "Apfelsaft", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1014", "name": "Apfelsaft Light", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1015", "name": "Multivitaminsaft", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1016", "name": "Multivitaminsaft Light", "category": "Getränk", "price": 1.39, "pack": "6"}, {"id": "1017", "name": "Bier Export", "category": "Getränk", "price": 0.65, "pack": "20"}, {"id": "1018", "name": "Bier Pilsner", "category": "Getränk", "price": 0.65, "pack": "20"}, {"id": "1019", "name": "Radler", "category": "Getränk", "price": 0.65, "pack": "20"}, {"id": "1020", "name": "Bier Alkoholfrei", "category": "Getränk", "price": 0.65, "pack": "11"}, {"id": "1021", "name": "Malzbier", "category": "Getränk", "price": 0.65, "pack": "6"}, {"id": "1022", "name": "Rotwein", "category": "Getränk", "price": 3.99, "pack": "6"}, {"id": "1023", "name": "Weißwein", "category": "Getränk", "price": 3.99, "pack": "6"}, {"id": "1024", "name": "Rosewein", "category": "Getränk", "price": 3.99, "pack": "6"}, {"id": "2001", "name": "Banane", "category": "Obst/Gemüse", "price": 1.29, "pack": "1"}, {"id": "2002", "name": "Apfel", "category": "Obst/Gemüse", "price": 1.49, "pack": "1"}, {"id": "2003", "name": "Erdberren", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2004", "name": "Blauberren", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2005", "name": "Kiwi", "category": "Obst/Gemüse", "price": 0.35, "pack": "5"}, {"id": "2006", "name": "Wassermelone", "category": "Obst/Gemüse", "price": 1.29, "pack": "1"}, {"id": "2007", "name": "Honigmelone", "category": "Obst/Gemüse", "price": 1.99, "pack": "1"}, {"id": "2008", "name": "Pfirsich", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2009", "name": "Nekarienen", "category": "Obst/Gemüse", "price": 2.49, "pack": "1"}, {"id": "2010", "name": "Gurke", "category": "Obst/Gemüse", "price": 0.69, "pack": "1"}, {"id": "2011", "name": "Tomaten", "category": "Obst/Gemüse", "price": 1.99, "pack": "1"}, {"id": "2012", "name": "Eisbergsalat", "category": "Obst/Gemüse", "price": 0.79, "pack": "1"}, {"id": "2013", "name": "Möhren", "category": "Obst/Gemüse", "price": 0.99, "pack": "1"}, {"id": "2014", "name": "Knoblauch", "category": "Obst/Gemüse", "price": 0.3, "pack": "1"}, {"id": "2015", "name": "Paprika", "category": "Obst/Gemüse", "price": 2.99, "pack": "1"}, {"id": "2016", "name": "Champions", "category": "Obst/Gemüse", "price": 1.99, "pack": "1"}, {"id": "2017", "name": "Kartoffeln", "category": "Obst/Gemüse", "price": 1.19, "pack": "1"}, {"id": "2018", "name": "Zwiebeln", "category": "Obst/Gemüse", "price": 0.99, "pack": "1"}, {"id": "3001", "name": "Toastbrot", "category": "Backwaren", "price": 0.79, "pack": "1"}, {"id": "3002", "name": "Schwarzbrot", "category": "Backwaren", "price": 1.49, "pack": "1"}, {"id": "3003", "name": "Schrippen", "category": "Backwaren", "price": 0.2, "pack": "5"}, {"id": "3004", "name": "Kaiserbrötchen", "category": "Backwaren", "price": 0.2, "pack": "5"}, {"id": "3005", "name": "Wellnisbrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3006", "name": "Roggenbrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3007", "name": "Sesambrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3008", "name": "Mohnbrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3009", "name": "Käsebrötchen", "category": "Backwaren", "price": 0.55, "pack": "5"}, {"id": "3010", "name": "Chiabata", "category": "Backwaren", "price": 1.29, "pack": "1"}, {"id": "4001", "name": "Salami", "category": "Wurst/Fleischwaren", "price": 1.29, "pack": "1"}, {"id": "4002", "name": "Bierschinken", "category": "Wurst/Fleischwaren", "price": 1.19, "pack": "1"}, {"id": "4003", "name": "Leberkäse", "category": "Wurst/Fleischwaren", "price": 1.49, "pack": "1"}, {"id": "4004", "name": "Jagtwurst", "category": "Wurst/Fleischwaren", "price": 1.19, "pack": "1"}, {"id": "4005", "name": "Gesichtwurst", "category": "Wurst/Fleischwaren", "price": 1.19, "pack": "1"}, {"id": "4006", "name": "Leberwurst", "category": "Wurst/Fleischwaren", "price": 1.0, "pack": "1"}, {"id": "4007", "name": "Teewurst", "category": "Wurst/Fleischwaren", "price": 1.0, "pack": "1"}, {"id": "4008", "name": "Schinken", "category": "Wurst/Fleischwaren", "price": 1.49, "pack": "1"}, {"id": "4009", "name": "Gulasch", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4010", "name": "Roster", "category": "Wurst/Fleischwaren", "price": 2.49, "pack": "1"}, {"id": "4011", "name": "Hack", "category": "Wurst/Fleischwaren", "price": 4.49, "pack": "1"}, {"id": "4012", "name": "Steak", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4013", "name": "Schnitzel", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4014", "name": "Hähnchengeschnetzeltes", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4015", "name": "Putengeschnetzeltes", "category": "Wurst/Fleischwaren", "price": 6.99, "pack": "1"}, {"id": "4016", "name": "Leber", "category": "Wurst/Fleischwaren", "price": 2.5, "pack": "1"}, {"id": "5001", "name": "Gummibärchen", "category": "Süßwaren", "price": 0.99, "pack": "1"}, {"id": "5002", "name": "Vollmilchschokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5003", "name": "Weiße Schokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5004", "name": "Zartbitterschokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5005", "name": "Haselnussschokolade", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "5006", "name": "Kinderriegel", "category": "Süßwaren", "price": 1.59, "pack": "1"}, {"id": "5007", "name": "Pralinen", "category": "Süßwaren", "price": 2.49, "pack": "1"}, {"id": "5008", "name": "Kekse", "category": "Süßwaren", "price": 1.19, "pack": "4"}, {"id": "5009", "name": "Kaugummi", "category": "Süßwaren", "price": 0.79, "pack": "5"}, {"id": "6001", "name": "Butter", "category": "Molkerreierzeugnisse", "price": 1.59, "pack": "1"}, {"id": "6002", "name": "Erdbeerjoghurt", "category": "Molkerreierzeugnisse", "price": 0.35, "pack": "4"}, {"id": "6003", "name": "Milch 1,5 % fett", "category": "Molkerreierzeugnisse", "price": 0.89, "pack": "10"}, {"id": "6004", "name": "Milch 3,5 % fett", "category": "Molkerreierzeugnisse", "price": 0.89, "pack": "10"}, {"id": "6005", "name": "Gouda", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6006", "name": "Emmentaler", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6007", "name": "Edamer", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6008", "name": "Cheddar", "category": "Molkerreierzeugnisse", "price": 1.29, "pack": "1"}, {"id": "6009", "name": "Quark 20 % Fett", "category": "Molkerreierzeugnisse", "price": 0.99, "pack": "1"}, {"id": "6010", "name": "Quark 40 % Fett", "category": "Molkerreierzeugnisse", "price": 0.99, "pack": "1"}]
+;
+
+const CAT_ICONS = {
+  "Getränk": "🥤",
+  "Obst/Gemüse": "🍎",
+  "Backwaren": "🥖",
+  "Wurst/Fleischwaren": "🥩",
+  "Süßwaren": "🍬",
+  "Molkerreierzeugnisse": "🧀"
+};
+
+// Starting stock per product (from Lager sheet: all start at 30, Meldebestand 20)
+const stock = {};
+PRODUCTS.forEach(p => stock[p.id] = 30);
+const MELDEBESTAND = 20;
+
+// Alkoholische Artikel — Alterssperre greift nur hier (Bier Alkoholfrei & Malzbier ausgenommen)
+const ALCOHOL_IDS = new Set(["1017","1018","1019","1022","1023","1024"]);
+
+function packSize(p){
+  return parseInt(p.pack, 10) || 1;
+}
+
+let activeCategory = "Alle";
+let searchTerm = "";
+let cart = {}; // id -> Menge in Einzel-Stück (immer Vielfaches der Verpackungsgröße)
+let given = 0;
+let ageGateCallback = null;
+
+const MWST_RATE = 0.19;
+
+function fmt(n){
+  return n.toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}) + " €";
+}
+
+// ---- clock ----
+function tickClock(){
+  const d = new Date();
+  document.getElementById('clock').textContent = d.toLocaleTimeString('de-DE');
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+// ---- sidebar categories ----
+const categories = ["Alle", ...Array.from(new Set(PRODUCTS.map(p => p.category)))];
+const sidebar = document.getElementById('sidebar');
+categories.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn' + (cat === activeCategory ? ' active' : '');
+  btn.dataset.cat = cat;
+  btn.innerHTML = `<div class="icon">${cat === "Alle" ? "▦" : (CAT_ICONS[cat] || "•")}</div><div>${cat === "Alle" ? "Alle" : cat.split('/')[0]}</div>`;
+  btn.onclick = () => {
+    activeCategory = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+    document.getElementById('catTitle').textContent = cat === "Alle" ? "Alle Warengruppen" : cat;
+    renderGrid();
+  };
+  sidebar.appendChild(btn);
+});
+
+// ---- quick cash buttons ----
+const quickAmounts = [5, 10, 20, 50];
+const qc = document.getElementById('quickCash');
+quickAmounts.forEach(a => {
+  const b = document.createElement('button');
+  b.textContent = a + " €";
+  b.onclick = () => {
+    document.getElementById('givenInput').value = a.toFixed(2).replace('.',',');
+    given = a;
+    renderSummary();
+  };
+  qc.appendChild(b);
+});
+
+// ---- product grid ----
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  let list = PRODUCTS.filter(p => activeCategory === "Alle" || p.category === activeCategory);
+  if (searchTerm.trim()){
+    const t = searchTerm.toLowerCase();
+    list = list.filter(p => p.name.toLowerCase().includes(t) || p.id.includes(t));
+  }
+  if (list.length === 0){
+    grid.innerHTML = '<div class="no-results">Keine Artikel gefunden.</div>';
+    return;
+  }
+  list.forEach(p => {
+    const remaining = stock[p.id];
+    const pack = packSize(p);
+    const isAlcohol = ALCOHOL_IDS.has(p.id);
+    const el = document.createElement('div');
+    el.className = 'product' + (remaining <= MELDEBESTAND - 10 ? ' low' : '') + (isAlcohol ? ' alcohol' : '');
+    el.innerHTML = `
+      ${isAlcohol ? '<div class="age-badge">18+</div>' : ''}
+      <div class="pname">${p.name}</div>
+      <div class="pid">Nr. ${p.id}${pack > 1 ? ` · Gebinde ${pack}×` : ''}</div>
+      <div class="pmeta">
+        <span class="pprice">${fmt(p.price)}${pack > 1 ? ' /Stk.' : ''}</span>
+        <span class="pstock">${remaining} auf Lager</span>
+      </div>
+    `;
+    el.onclick = () => addToCart(p.id);
+    grid.appendChild(el);
+  });
+}
+
+function showAgeGate(productName, onConfirm){
+  document.getElementById('ageText').textContent =
+    `„${productName}“ ist ein alkoholisches Produkt. Ist der Kunde nachweislich mindestens 18 Jahre alt?`;
+  ageGateCallback = onConfirm;
+  document.getElementById('ageOverlay').classList.add('show');
+}
+
+function addToCart(id){
+  const p = PRODUCTS.find(x => x.id === id);
+  const pack = packSize(p);
+  if (stock[id] < pack){
+    showToast(`Nicht genug Bestand für ein volles Gebinde von ${p.name} (${pack} Stk. nötig).`);
+    return;
+  }
+  const commit = () => {
+    cart[id] = (cart[id] || 0) + pack;
+    stock[id] -= pack;
+    renderAll();
+  };
+  if (ALCOHOL_IDS.has(id)){
+    showAgeGate(p.name, commit);
+    return;
+  }
+  commit();
+}
+
+function changeQty(id, deltaPacks){
+  const p = PRODUCTS.find(x => x.id === id);
+  const pack = packSize(p);
+  const deltaUnits = deltaPacks * pack;
+  if (deltaUnits > 0 && stock[id] < deltaUnits){
+    showToast('Kein weiterer Bestand für ein volles Gebinde.');
+    return;
+  }
+  const apply = () => {
+    cart[id] += deltaUnits;
+    stock[id] -= deltaUnits;
+    if (cart[id] <= 0){
+      delete cart[id];
+    }
+    renderAll();
+  };
+  if (deltaUnits > 0 && ALCOHOL_IDS.has(id)){
+    showAgeGate(p.name, apply);
+    return;
+  }
+  apply();
+}
+
+function removeItem(id){
+  stock[id] += cart[id];
+  delete cart[id];
+  renderAll();
+}
+
+function renderCart(){
+  const list = document.getElementById('cartList');
+  const ids = Object.keys(cart);
+  document.getElementById('itemCount').textContent = ids.reduce((s,id)=>s+cart[id],0) + " Stück";
+  if (ids.length === 0){
+    list.innerHTML = '<div class="cart-empty">Warenkorb leer.<br>Artikel antippen oder Nummer scannen.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  ids.forEach(id => {
+    const p = PRODUCTS.find(x => x.id === id);
+    const pack = packSize(p);
+    const totalUnits = cart[id];
+    const packs = totalUnits / pack;
+    const line = p.price * totalUnits;
+    const qtyLabel = pack > 1 ? `${packs}` : `${totalUnits}`;
+    const qtyUnit = pack > 1 ? 'Geb.' : 'Stk.';
+    const subLabel = pack > 1
+      ? `${fmt(p.price)} /Stk. · Gebinde à ${pack} = ${totalUnits} Stk.`
+      : `${fmt(p.price)} · Nr. ${p.id}`;
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    div.innerHTML = `
+      <div>
+        <div class="ci-name">${p.name}${ALCOHOL_IDS.has(id) ? ' <span class="ci-age">18+</span>' : ''}</div>
+        <div class="ci-sub">${subLabel}</div>
+      </div>
+      <div class="ci-qty">
+        <button data-act="minus">−</button>
+        <span>${qtyLabel} ${qtyUnit}</span>
+        <button data-act="plus">+</button>
+      </div>
+      <div class="ci-line">${fmt(line)}</div>
+      <div class="ci-remove">Entfernen</div>
+    `;
+    div.querySelector('[data-act="minus"]').onclick = () => changeQty(id, -1);
+    div.querySelector('[data-act="plus"]').onclick = () => changeQty(id, 1);
+    div.querySelector('.ci-remove').onclick = () => removeItem(id);
+    list.appendChild(div);
+  });
+}
+
+function calcTotals(){
+  let brutto = 0;
+  Object.keys(cart).forEach(id => {
+    const p = PRODUCTS.find(x => x.id === id);
+    brutto += p.price * cart[id];
+  });
+  const netto = brutto / (1 + MWST_RATE);
+  const mwst = brutto - netto;
+  return {brutto, netto, mwst};
+}
+
+function renderSummary(){
+  const {brutto, netto, mwst} = calcTotals();
+  document.getElementById('sumNetto').textContent = fmt(netto);
+  document.getElementById('sumMwst').textContent = fmt(mwst);
+  document.getElementById('sumBrutto').textContent = fmt(brutto);
+
+  const totalDisplay = document.getElementById('totalDisplay');
+  totalDisplay.textContent = fmt(brutto);
+  totalDisplay.classList.remove('flash');
+  void totalDisplay.offsetWidth;
+  totalDisplay.classList.add('flash');
+
+  const change = given - brutto;
+  const changeEl = document.getElementById('changeVal');
+  changeEl.textContent = fmt(Math.abs(change));
+  changeEl.classList.toggle('neg', change < 0);
+
+  const payBtn = document.getElementById('payBtn');
+  payBtn.disabled = !(brutto > 0 && given >= brutto);
+}
+
+function renderAll(){
+  renderGrid();
+  renderCart();
+  renderSummary();
+}
+
+// ---- search / scan ----
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  renderGrid();
+});
+
+document.getElementById('scanInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter'){
+    const id = e.target.value.trim();
+    const p = PRODUCTS.find(x => x.id === id);
+    if (p){
+      addToCart(id);
+      e.target.value = '';
+    } else if (id) {
+      showToast('Unbekannte Artikelnummer: ' + id);
+      e.target.value = '';
+    }
+  }
+});
+
+// ---- given amount ----
+document.getElementById('givenInput').addEventListener('input', e => {
+  const raw = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+  given = parseFloat(raw) || 0;
+  renderSummary();
+});
+
+// ---- clear ----
+document.getElementById('clearBtn').addEventListener('click', () => {
+  Object.keys(cart).forEach(id => { stock[id] += cart[id]; });
+  cart = {};
+  given = 0;
+  document.getElementById('givenInput').value = '';
+  renderAll();
+});
+
+// ---- pay ----
+document.getElementById('payBtn').addEventListener('click', () => {
+  const {brutto, netto, mwst} = calcTotals();
+  const change = given - brutto;
+  const now = new Date();
+
+  let html = `
+    <h2>MARKT/24</h2>
+    <div class="sub">Kasse 03 · Bon Nr. ${Math.floor(1000+Math.random()*8999)}<br>${now.toLocaleDateString('de-DE')} ${now.toLocaleTimeString('de-DE')}</div>
+    <hr>
+  `;
+  Object.keys(cart).forEach(id => {
+    const p = PRODUCTS.find(x => x.id === id);
+    const qty = cart[id];
+    html += `<div class="receipt-line"><span class="rname">${qty}× ${p.name}</span><span>${fmt(p.price*qty)}</span></div>`;
+  });
+  html += `
+    <hr>
+    <div class="receipt-line"><span>Nettobetrag</span><span>${fmt(netto)}</span></div>
+    <div class="receipt-line"><span>MwSt 19%</span><span>${fmt(mwst)}</span></div>
+    <div class="rtotal"><span>Bruttobetrag</span><span>${fmt(brutto)}</span></div>
+    <hr>
+    <div class="receipt-line"><span>Gegeben</span><span>${fmt(given)}</span></div>
+    <div class="receipt-line"><span>Rückgeld</span><span>${fmt(change)}</span></div>
+    <div class="rfoot">Danke für Ihren Einkauf!<br>MARKT/24 · Kundenservice: 0800 / 24 24 24</div>
+    <button class="receipt-close" id="closeReceipt">Neuer Kunde</button>
+  `;
+  document.getElementById('receiptBody').innerHTML = html;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('closeReceipt').onclick = () => {
+    document.getElementById('overlay').classList.remove('show');
+    cart = {};
+    given = 0;
+    document.getElementById('givenInput').value = '';
+    renderAll();
+  };
+});
+
+// ---- Lager / Wareneingang ----
+let lagerSearchTerm = '';
+
+function renderLagerTable(){
+  const wrap = document.getElementById('lagerTable');
+  wrap.innerHTML = '';
+  let list = PRODUCTS.slice();
+  if (lagerSearchTerm.trim()){
+    const t = lagerSearchTerm.toLowerCase();
+    list = list.filter(p => p.name.toLowerCase().includes(t) || p.id.includes(t));
+  }
+  list.forEach(p => {
+    const bestand = stock[p.id];
+    const row = document.createElement('div');
+    row.className = 'lager-row';
+    row.dataset.id = p.id;
+    row.innerHTML = `
+      <div class="lname">${p.name}</div>
+      <div class="lid">${p.id}</div>
+      <div class="lstock ${bestand <= MELDEBESTAND ? 'low' : 'ok'}">${bestand}</div>
+      <div class="lmelde">${MELDEBESTAND}</div>
+      <div class="lzugang">
+        <input type="number" min="1" placeholder="Menge" data-id="${p.id}">
+        <button data-id="${p.id}">Einbuchen</button>
+      </div>
+    `;
+    const input = row.querySelector('input');
+    const btn = row.querySelector('button');
+    const doRestock = () => {
+      const val = parseInt(input.value, 10);
+      if (!val || val <= 0){
+        showToast('Bitte eine gültige Menge eingeben.');
+        return;
+      }
+      stock[p.id] += val;
+      input.value = '';
+      renderGrid();
+      renderLagerTable();
+      const newRow = wrap.querySelector(`.lager-row[data-id="${p.id}"]`);
+      if (newRow){
+        newRow.classList.add('just-added');
+        setTimeout(() => newRow.classList.remove('just-added'), 800);
+      }
+      showToast(`+${val} × ${p.name} eingebucht — neuer Bestand: ${stock[p.id]}`);
+    };
+    btn.onclick = doRestock;
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') doRestock(); });
+    wrap.appendChild(row);
+  });
+}
+
+document.getElementById('lagerBtn').addEventListener('click', () => {
+  renderLagerTable();
+  document.getElementById('lagerOverlay').classList.add('show');
+});
+document.getElementById('lagerCloseBtn').addEventListener('click', () => {
+  document.getElementById('lagerOverlay').classList.remove('show');
+});
+document.getElementById('lagerSearch').addEventListener('input', e => {
+  lagerSearchTerm = e.target.value;
+  renderLagerTable();
+});
+
+// ---- Alterssperre ----
+document.getElementById('ageYesBtn').addEventListener('click', () => {
+  document.getElementById('ageOverlay').classList.remove('show');
+  const cb = ageGateCallback;
+  ageGateCallback = null;
+  if (cb) cb();
+});
+document.getElementById('ageNoBtn').addEventListener('click', () => {
+  document.getElementById('ageOverlay').classList.remove('show');
+  ageGateCallback = null;
+  showToast('Verkauf abgelehnt — Mindestalter 18 nicht bestätigt.');
+});
+
+// ---- toast ----
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+renderAll();
+</script>
+</body>
+</html>
