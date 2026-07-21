@@ -1076,7 +1076,7 @@ function tone(freq, duration, type, delay, gainVal){
     osc.stop(startTime + duration + 0.02);
   } catch(e){ /* Audio nicht verfügbar — Kasse funktioniert stumm weiter */ }
 }
-function playScanSound(){ tone(1300, 0.055, 'square', 0, 0.09); }
+function playScanSound(){ tone(1300, 0.09, 'square', 0, 0.32); }
 function playErrorSound(){ tone(280, 0.13, 'sawtooth', 0, 0.12); tone(200, 0.16, 'sawtooth', 0.13, 0.12); }
 function playStornoSound(){ tone(520, 0.07, 'triangle', 0, 0.11); tone(340, 0.1, 'triangle', 0.07, 0.11); }
 function playDrawerSound(){ tone(140, 0.2, 'square', 0, 0.09); tone(90, 0.22, 'square', 0.05, 0.07); }
