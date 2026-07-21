@@ -882,6 +882,29 @@ html,body{
   padding: 30px 0;
 }
 
+.move-row{
+  display:grid;
+  grid-template-columns: 0.7fr 1.6fr 0.8fr 1fr 1.4fr;
+  gap:8px;
+  align-items:center;
+  padding: 8px 8px;
+  border-bottom:1px solid var(--line);
+  font-size:12px;
+}
+.move-row .mtype{
+  font-size:10.5px;
+  font-weight:700;
+  padding: 3px 8px;
+  border-radius:5px;
+  text-align:center;
+}
+.move-row .mtype.eingang{ background: rgba(89,214,124,0.14); color: var(--green); }
+.move-row .mtype.ausgang{ background: rgba(255,107,94,0.14); color: var(--red); }
+.move-row .mname{ font-weight:600; }
+.move-row .mqty{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.move-row .mreason{ color: var(--muted); font-size:11px; }
+.move-row .mtime{ color: var(--muted); font-size:10.5px; }
+
 ::-webkit-scrollbar{ width:8px; height:8px; }
 ::-webkit-scrollbar-thumb{ background: var(--line); border-radius:4px; }
 ::-webkit-scrollbar-track{ background: transparent; }
@@ -896,6 +919,7 @@ html,body{
     </div>
     <div class="header-right">
       <button class="lager-btn" id="drawerBtn">🗄 Lade</button>
+      <button class="lager-btn" id="movesBtn">📜 Ein/Ausgänge</button>
       <button class="lager-btn" id="bonsBtn">🧾 Bons</button>
       <button class="lager-btn" id="reportBtn">📊 Bericht</button>
       <button class="lager-btn" id="lagerBtn">📦 Lager</button>
@@ -1004,6 +1028,21 @@ html,body{
   </div>
 </div>
 
+<div class="overlay" id="movesOverlay">
+  <div class="lager-panel">
+    <div class="lager-head">
+      <h2>Ein- &amp; Ausgänge (Datenbank)</h2>
+      <button id="movesCloseBtn">✕</button>
+    </div>
+    <div class="lager-searchrow">
+      <input id="movesSearch" type="text" placeholder="Artikel oder Nummer suchen…" autocomplete="off">
+    </div>
+    <div class="lager-table-wrap">
+      <div id="movesTable"></div>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="reportOverlay">
   <div class="receipt" id="reportBody"></div>
 </div>
@@ -1025,6 +1064,81 @@ const CAT_ICONS = {
 const stock = {};
 PRODUCTS.forEach(p => stock[p.id] = 30);
 const MELDEBESTAND = 20;
+
+// ---- Datenbank (IndexedDB): speichert Lagerbestand + jede Bewegung dauerhaft im Browser ----
+let db = null;
+let dbReady = false;
+let movementLog = [];
+
+function openDatabase(){
+  return new Promise((resolve) => {
+    if (!window.indexedDB){ resolve(false); return; }
+    const req = indexedDB.open('markt24_db', 1);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('movements')){
+        const store = d.createObjectStore('movements', {keyPath:'id', autoIncrement:true});
+        store.createIndex('timestamp', 'timestamp');
+      }
+      if (!d.objectStoreNames.contains('stock')){
+        d.createObjectStore('stock', {keyPath:'productId'});
+      }
+    };
+    req.onsuccess = (e) => { db = e.target.result; dbReady = true; resolve(true); };
+    req.onerror = () => resolve(false);
+  });
+}
+
+function dbSaveStock(productId, qty){
+  if (!dbReady) return;
+  try{
+    const tx = db.transaction('stock', 'readwrite');
+    tx.objectStore('stock').put({productId, qty});
+  } catch(e){}
+}
+
+function dbLogMovement(entry){
+  if (!dbReady) return;
+  try{
+    const tx = db.transaction('movements', 'readwrite');
+    tx.objectStore('movements').add(entry);
+  } catch(e){}
+}
+
+function loadDatabase(){
+  return new Promise((resolve) => {
+    if (!dbReady){ resolve(); return; }
+    const stockMap = {};
+    const movements = [];
+    const tx = db.transaction(['stock', 'movements'], 'readonly');
+    const stockReq = tx.objectStore('stock').getAll();
+    const movReq = tx.objectStore('movements').getAll();
+    tx.oncomplete = () => {
+      (stockReq.result || []).forEach(r => stockMap[r.productId] = r.qty);
+      movements.push(...(movReq.result || []));
+      resolve({stockMap, movements});
+    };
+    tx.onerror = () => resolve({stockMap:{}, movements:[]});
+  });
+}
+
+// Zentraler Punkt für JEDE Lagerbestandsänderung — schreibt Bestand + Bewegung in die DB
+function adjustStock(id, delta, reason){
+  if (delta === 0) return;
+  stock[id] += delta;
+  dbSaveStock(id, stock[id]);
+  const p = PRODUCTS.find(x => x.id === id);
+  const entry = {
+    type: delta > 0 ? 'eingang' : 'ausgang',
+    productId: id,
+    productName: p ? p.name : id,
+    qty: Math.abs(delta),
+    reason: reason,
+    timestamp: new Date().toISOString()
+  };
+  movementLog.push(entry);
+  dbLogMovement(entry);
+}
 
 // Alkoholische Artikel — Alterssperre greift nur hier (Bier Alkoholfrei & Malzbier ausgenommen)
 const ALCOHOL_IDS = new Set(["1017","1018","1019","1022","1023","1024"]);
@@ -1068,7 +1182,7 @@ function tone(freq, duration, type, delay, gainVal){
     osc.type = type || 'sine';
     osc.frequency.value = freq;
     const startTime = ctx.currentTime + (delay || 0);
-    gain.gain.setValueAtTime(gainVal || 0.15, startTime);
+    gain.gain.setValueAtTime(gainVal || SOUND_GAIN, startTime);
     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -1076,14 +1190,15 @@ function tone(freq, duration, type, delay, gainVal){
     osc.stop(startTime + duration + 0.02);
   } catch(e){ /* Audio nicht verfügbar — Kasse funktioniert stumm weiter */ }
 }
-function playScanSound(){ tone(1300, 0.09, 'square', 0, 0.32); }
-function playErrorSound(){ tone(280, 0.13, 'sawtooth', 0, 0.12); tone(200, 0.16, 'sawtooth', 0.13, 0.12); }
-function playStornoSound(){ tone(520, 0.07, 'triangle', 0, 0.11); tone(340, 0.1, 'triangle', 0.07, 0.11); }
-function playDrawerSound(){ tone(140, 0.2, 'square', 0, 0.09); tone(90, 0.22, 'square', 0.05, 0.07); }
+const SOUND_GAIN = 0.3; // einheitliche Lautstärke für alle Kassentöne
+function playScanSound(){ tone(1300, 0.09, 'square', 0, SOUND_GAIN); }
+function playErrorSound(){ tone(280, 0.13, 'sawtooth', 0, SOUND_GAIN); tone(200, 0.16, 'sawtooth', 0.13, SOUND_GAIN); }
+function playStornoSound(){ tone(520, 0.07, 'triangle', 0, SOUND_GAIN); tone(340, 0.1, 'triangle', 0.07, SOUND_GAIN); }
+function playDrawerSound(){ tone(140, 0.2, 'square', 0, SOUND_GAIN); tone(90, 0.22, 'square', 0.05, SOUND_GAIN); }
 function playCashSound(){
-  tone(660, 0.09, 'sine', 0, 0.14);
-  tone(880, 0.09, 'sine', 0.08, 0.14);
-  tone(1320, 0.18, 'sine', 0.16, 0.16);
+  tone(660, 0.09, 'sine', 0, SOUND_GAIN);
+  tone(880, 0.09, 'sine', 0.08, SOUND_GAIN);
+  tone(1320, 0.18, 'sine', 0.16, SOUND_GAIN);
   playDrawerSound();
 }
 
@@ -1210,7 +1325,7 @@ function addToCart(id){
   }
   const commit = () => {
     cart[id] = (cart[id] || 0) + pack;
-    stock[id] -= pack;
+    adjustStock(id, -pack, 'Verkauf (Warenkorb)');
     cartOrder.push({id, units: pack});
     playScanSound();
     renderAll();
@@ -1233,7 +1348,7 @@ function changeQty(id, deltaPacks){
   }
   const apply = () => {
     cart[id] += deltaUnits;
-    stock[id] -= deltaUnits;
+    adjustStock(id, -deltaUnits, deltaUnits > 0 ? 'Verkauf (Warenkorb +)' : 'Warenkorb-Korrektur (−)');
     if (deltaUnits > 0){
       cartOrder.push({id, units: deltaUnits});
       playScanSound();
@@ -1256,7 +1371,7 @@ function changeQty(id, deltaPacks){
 }
 
 function removeItem(id){
-  stock[id] += cart[id];
+  adjustStock(id, cart[id], 'Posten storniert');
   delete cart[id];
   cartOrder = cartOrder.filter(o => o.id !== id);
   playStornoSound();
@@ -1270,7 +1385,7 @@ function undoLastItem(){
   }
   const last = cartOrder.pop();
   cart[last.id] -= last.units;
-  stock[last.id] += last.units;
+  adjustStock(last.id, last.units, 'Letzter Artikel storniert');
   if (cart[last.id] <= 0) delete cart[last.id];
   playStornoSound();
   const p = PRODUCTS.find(x => x.id === last.id);
@@ -1410,7 +1525,7 @@ document.getElementById('givenInput').addEventListener('input', e => {
 // ---- Storno (kompletter Warenkorb) ----
 document.getElementById('clearBtn').addEventListener('click', () => {
   if (Object.keys(cart).length === 0) return;
-  Object.keys(cart).forEach(id => { stock[id] += cart[id]; });
+  Object.keys(cart).forEach(id => { adjustStock(id, cart[id], 'Warenkorb komplett storniert'); });
   cart = {};
   cartOrder = [];
   given = 0;
@@ -1526,7 +1641,7 @@ function renderLagerTable(){
         showToast('Bitte eine gültige Menge eingeben.');
         return;
       }
-      stock[p.id] += val;
+      adjustStock(p.id, val, 'Wareneingang (Lager)');
       input.value = '';
       renderGrid();
       renderLagerTable();
@@ -1601,7 +1716,7 @@ function renderBonsTable(){
     const voidBtn = row.querySelector('[data-act="void"]');
     if (voidBtn){
       voidBtn.onclick = () => {
-        tx.items.forEach(it => { stock[it.id] += it.qty; });
+        tx.items.forEach(it => { adjustStock(it.id, it.qty, 'Bon #' + tx.id + ' storniert'); });
         tx.voided = true;
         playStornoSound();
         showToast(`Bon #${tx.id} storniert — Ware wieder eingebucht.`);
@@ -1619,6 +1734,48 @@ document.getElementById('bonsBtn').addEventListener('click', () => {
 });
 document.getElementById('bonsCloseBtn').addEventListener('click', () => {
   document.getElementById('bonsOverlay').classList.remove('show');
+});
+
+// ---- Ein- & Ausgänge (Datenbank-Bewegungshistorie) ----
+let movesSearchTerm = '';
+
+function renderMovesTable(){
+  const wrap = document.getElementById('movesTable');
+  wrap.innerHTML = '';
+  let list = movementLog.slice().reverse();
+  if (movesSearchTerm.trim()){
+    const t = movesSearchTerm.toLowerCase();
+    list = list.filter(m => m.productName.toLowerCase().includes(t) || m.productId.includes(t));
+  }
+  if (list.length === 0){
+    wrap.innerHTML = '<div class="bons-empty">Noch keine Lagerbewegungen erfasst.</div>';
+    return;
+  }
+  list.slice(0, 300).forEach(m => {
+    const d = new Date(m.timestamp);
+    const row = document.createElement('div');
+    row.className = 'move-row';
+    row.innerHTML = `
+      <div class="mtype ${m.type}">${m.type === 'eingang' ? 'Eingang' : 'Ausgang'}</div>
+      <div class="mname">${m.productName}<br><span class="mreason">Nr. ${m.productId}</span></div>
+      <div class="mqty">${m.type === 'eingang' ? '+' : '−'}${m.qty}</div>
+      <div class="mreason">${m.reason}</div>
+      <div class="mtime">${d.toLocaleDateString('de-DE')}<br>${d.toLocaleTimeString('de-DE')}</div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+document.getElementById('movesBtn').addEventListener('click', () => {
+  renderMovesTable();
+  document.getElementById('movesOverlay').classList.add('show');
+});
+document.getElementById('movesCloseBtn').addEventListener('click', () => {
+  document.getElementById('movesOverlay').classList.remove('show');
+});
+document.getElementById('movesSearch').addEventListener('input', e => {
+  movesSearchTerm = e.target.value;
+  renderMovesTable();
 });
 
 // ---- Tagesabschluss / Z-Bericht ----
@@ -1669,7 +1826,26 @@ function showToast(msg){
   toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-renderAll();
+// ---- App-Start: Datenbank öffnen, gespeicherten Bestand + Bewegungen laden ----
+async function initApp(){
+  await openDatabase();
+  if (dbReady){
+    const {stockMap, movements} = await loadDatabase();
+    const hasSavedStock = stockMap && Object.keys(stockMap).length > 0;
+    if (hasSavedStock){
+      PRODUCTS.forEach(p => {
+        stock[p.id] = stockMap[p.id] !== undefined ? stockMap[p.id] : 30;
+      });
+      movementLog = movements || [];
+      showToast('Lagerbestand aus der Datenbank geladen.');
+    } else {
+      // Erster Start: Ausgangsbestand einmalig in der DB anlegen
+      PRODUCTS.forEach(p => dbSaveStock(p.id, stock[p.id]));
+    }
+  }
+  renderAll();
+}
+initApp();
 </script>
 </body>
 </html>
