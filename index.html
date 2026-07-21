@@ -653,9 +653,47 @@ html,body{
   font-size:13px;
 }
 .lager-head button:hover{ color: var(--text); border-color: var(--red); }
-.lager-searchrow{ padding: 12px 18px 0 18px; }
+
+.lager-table-wrap{
+  overflow-y:auto;
+  padding: 12px 18px 18px 18px;
+}
+
+.lager-panel-xl{ width: 760px; }
+
+.lager-stats{
+  display:flex;
+  gap:10px;
+  padding: 12px 18px 0 18px;
+}
+.lager-stat{
+  flex:1;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding: 9px 12px;
+}
+.lager-stat .lsnum{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:19px;
+}
+.lager-stat .lslabel{
+  font-size:10px;
+  color: var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+.lager-stat.warn .lsnum{ color: var(--red); }
+.lager-stat.good .lsnum{ color: var(--green); }
+
+.lager-searchrow{
+  padding: 12px 18px 0 18px;
+  display:flex;
+  gap:8px;
+}
 .lager-searchrow input{
-  width:100%;
+  flex:1;
   background: var(--panel-2);
   border:1px solid var(--line);
   border-radius:8px;
@@ -666,74 +704,183 @@ html,body{
   font-family:'Inter',sans-serif;
 }
 .lager-searchrow input:focus{ border-color: var(--teal); }
-.lager-table-wrap{
-  overflow-y:auto;
-  padding: 12px 18px 18px 18px;
-}
-.lager-table-head{
-  display:grid;
-  grid-template-columns: 2fr 0.7fr 0.8fr 1fr 1.3fr;
-  gap:8px;
-  font-size:10.5px;
-  text-transform:uppercase;
-  letter-spacing:.5px;
-  color: var(--muted);
-  padding: 6px 8px;
-  border-bottom:1px solid var(--line);
-  position:sticky; top:0;
-  background: var(--panel);
-}
-.lager-row{
-  display:grid;
-  grid-template-columns: 2fr 0.7fr 0.8fr 1fr 1.3fr;
-  gap:8px;
-  align-items:center;
-  padding: 8px 8px;
-  border-bottom:1px solid var(--line);
-  font-size:12.5px;
-}
-.lager-row .lname{ font-weight:600; }
-.lager-row .lid{ color: var(--muted); font-size:11px; }
-.lager-row .lstock{
-  font-family:'Space Grotesk',sans-serif;
-  font-weight:700;
-}
-.lager-row .lstock.low{ color: var(--red); }
-.lager-row .lstock.ok{ color: var(--green); }
-.lager-row .lmelde{ color: var(--muted); font-size:11.5px; }
-.lager-row .lzugang{
-  display:flex;
-  gap:6px;
-}
-.lager-row .lzugang input{
-  width:52px;
+.lager-low-toggle{
+  white-space:nowrap;
   background: var(--panel-2);
   border:1px solid var(--line);
-  border-radius:6px;
-  padding:5px 6px;
+  color: var(--muted);
+  border-radius:8px;
+  padding: 0 14px;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.lager-low-toggle:hover{ border-color: var(--red); color: var(--text); }
+.lager-low-toggle.active{
+  background: rgba(255,107,94,0.14);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.lager-cat-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  padding: 10px 18px 0 18px;
+}
+.lager-cat-chips button{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--muted);
+  border-radius:16px;
+  padding: 5px 12px;
+  font-size:11.5px;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.lager-cat-chips button:hover{ color: var(--text); }
+.lager-cat-chips button.active{
+  background: rgba(63,214,192,0.14);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.lager-cards-wrap{
+  overflow-y:auto;
+  padding: 12px 18px 18px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.lager-card{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius:10px;
+  padding: 12px 14px;
+  transition: border-color .15s ease;
+}
+.lager-card.low{ border-left-color: var(--red); }
+.lager-card.ok{ border-left-color: var(--green); }
+.lager-card-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+.lager-avatar{
+  width:34px; height:34px;
+  border-radius:9px;
+  background: var(--panel);
+  border:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+}
+.lager-card-info{ flex:1; min-width:0; }
+.lager-card-info .lname{
+  font-weight:600;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.lager-card-info .lmeta{
+  font-size:10.5px;
+  color: var(--muted);
+  margin-top:1px;
+}
+.lager-card-numbers{ text-align:right; flex-shrink:0; }
+.lager-card-numbers .lstock{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:18px;
+}
+.lager-card-numbers .lstock.low{ color: var(--red); }
+.lager-card-numbers .lstock.ok{ color: var(--green); }
+.lager-card-numbers .lmelde{
+  font-size:10px;
+  color: var(--muted);
+}
+.lager-bar-track{
+  width:100%;
+  height:6px;
+  background: var(--panel);
+  border-radius:4px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+.lager-bar-fill{
+  height:100%;
+  border-radius:4px;
+  transition: width .3s ease;
+}
+.lager-actions-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.lager-actions-row input[type="number"]{
+  width:64px;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius:7px;
+  padding:6px 7px;
   color: var(--text);
   font-size:12px;
   text-align:center;
   outline:none;
 }
-.lager-row .lzugang input:focus{ border-color: var(--amber); }
-.lager-row .lzugang button{
-  background: rgba(89,214,124,0.12);
-  border:1px solid var(--green);
-  color: var(--green);
-  border-radius:6px;
-  padding: 5px 10px;
+.lager-actions-row input[type="number"]:focus{ border-color: var(--amber); }
+.lager-actions-row select{
+  flex:1;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius:7px;
+  padding:6px 8px;
+  color: var(--text);
+  font-size:11.5px;
+  outline:none;
+  font-family:'Inter',sans-serif;
+}
+.lager-actions-row select:focus{ border-color: var(--teal); }
+.lager-actions-row button{
+  border-radius:7px;
+  padding: 7px 12px;
   font-size:11.5px;
   font-weight:700;
   cursor:pointer;
+  white-space:nowrap;
+  font-family:'Inter',sans-serif;
 }
-.lager-row .lzugang button:hover{ filter:brightness(1.2); }
-.lager-row.just-added{
-  animation: rowFlash .8s ease;
+.lz-in{
+  background: rgba(89,214,124,0.12);
+  border:1px solid var(--green) !important;
+  color: var(--green);
 }
-@keyframes rowFlash{
-  0%{ background: rgba(89,214,124,0.18); }
-  100%{ background: transparent; }
+.lz-in:hover{ filter:brightness(1.2); }
+.lz-out{
+  background: rgba(255,107,94,0.12);
+  border:1px solid var(--red) !important;
+  color: var(--red);
+}
+.lz-out:hover{ filter:brightness(1.2); }
+.lager-card.just-added{
+  animation: cardFlashIn .8s ease;
+}
+.lager-card.just-removed{
+  animation: cardFlashOut .8s ease;
+}
+@keyframes cardFlashIn{
+  0%{ background: rgba(89,214,124,0.22); }
+  100%{ background: var(--panel-2); }
+}
+@keyframes cardFlashOut{
+  0%{ background: rgba(255,107,94,0.22); }
+  100%{ background: var(--panel-2); }
 }
 
 .toast{
@@ -1027,20 +1174,18 @@ html,body{
 </div>
 
 <div class="overlay" id="lagerOverlay">
-  <div class="lager-panel">
+  <div class="lager-panel lager-panel-xl">
     <div class="lager-head">
-      <h2>Wareneingang</h2>
+      <h2>📦 Lagerverwaltung</h2>
       <button id="lagerCloseBtn">✕</button>
     </div>
+    <div class="lager-stats" id="lagerStats"></div>
     <div class="lager-searchrow">
       <input id="lagerSearch" type="text" placeholder="Artikel oder Nummer suchen…" autocomplete="off">
+      <button class="lager-low-toggle" id="lagerLowToggle">⚠ Nur niedrige Bestände</button>
     </div>
-    <div class="lager-table-wrap">
-      <div class="lager-table-head">
-        <span>Artikel</span><span>Nr.</span><span>Bestand</span><span>Meldebestand</span><span>Zugang buchen</span>
-      </div>
-      <div id="lagerTable"></div>
-    </div>
+    <div class="lager-cat-chips" id="lagerCatChips"></div>
+    <div class="lager-cards-wrap" id="lagerCards"></div>
   </div>
 </div>
 
@@ -1674,59 +1819,156 @@ document.getElementById('payBtn').addEventListener('click', () => {
   };
 });
 
-// ---- Lager / Wareneingang ----
+// ---- Lager / Bestandsverwaltung ----
 let lagerSearchTerm = '';
+let lagerCategory = 'Alle';
+let lagerLowOnly = false;
+const AUSBUCH_GRUENDE = ['Schwund', 'Beschädigt', 'Ablauf/MHD', 'Inventurkorrektur', 'Sonstiges'];
+const REFERENZ_BESTAND = 30; // Startbestand laut Lager-Tabelle, dient als "voller Balken"
 
-function renderLagerTable(){
-  const wrap = document.getElementById('lagerTable');
+function renderLagerStats(){
+  const total = PRODUCTS.length;
+  const lowCount = PRODUCTS.filter(p => stock[p.id] <= MELDEBESTAND).length;
+  const totalUnits = PRODUCTS.reduce((s,p) => s + stock[p.id], 0);
+  document.getElementById('lagerStats').innerHTML = `
+    <div class="lager-stat">
+      <div class="lsnum">${total}</div>
+      <div class="lslabel">Artikel</div>
+    </div>
+    <div class="lager-stat">
+      <div class="lsnum">${totalUnits}</div>
+      <div class="lslabel">Stück gesamt</div>
+    </div>
+    <div class="lager-stat ${lowCount > 0 ? 'warn' : 'good'}">
+      <div class="lsnum">${lowCount}</div>
+      <div class="lslabel">Niedriger Bestand</div>
+    </div>
+  `;
+}
+
+function renderLagerCatChips(){
+  const wrap = document.getElementById('lagerCatChips');
+  wrap.innerHTML = '';
+  categories.forEach(cat => {
+    const b = document.createElement('button');
+    b.textContent = cat === "Alle" ? "Alle" : cat;
+    b.className = cat === lagerCategory ? 'active' : '';
+    b.onclick = () => {
+      lagerCategory = cat;
+      renderLagerCatChips();
+      renderLagerCards();
+    };
+    wrap.appendChild(b);
+  });
+}
+
+function renderLagerCards(flashId, flashType){
+  const wrap = document.getElementById('lagerCards');
   wrap.innerHTML = '';
   let list = PRODUCTS.slice();
+  if (lagerCategory !== 'Alle'){
+    list = list.filter(p => p.category === lagerCategory);
+  }
+  if (lagerLowOnly){
+    list = list.filter(p => stock[p.id] <= MELDEBESTAND);
+  }
   if (lagerSearchTerm.trim()){
     const t = lagerSearchTerm.toLowerCase();
     list = list.filter(p => p.name.toLowerCase().includes(t) || p.id.includes(t));
   }
+  renderLagerStats();
+
+  if (list.length === 0){
+    wrap.innerHTML = '<div class="bons-empty">Keine Artikel gefunden.</div>';
+    return;
+  }
+
   list.forEach(p => {
     const bestand = stock[p.id];
-    const row = document.createElement('div');
-    row.className = 'lager-row';
-    row.dataset.id = p.id;
-    row.innerHTML = `
-      <div class="lname">${p.name}</div>
-      <div class="lid">${p.id}</div>
-      <div class="lstock ${bestand <= MELDEBESTAND ? 'low' : 'ok'}">${bestand}</div>
-      <div class="lmelde">${MELDEBESTAND}</div>
-      <div class="lzugang">
-        <input type="number" min="1" placeholder="Menge" data-id="${p.id}">
-        <button data-id="${p.id}">Einbuchen</button>
+    const low = bestand <= MELDEBESTAND;
+    const pct = Math.max(0, Math.min(100, (bestand / REFERENZ_BESTAND) * 100));
+    const barColor = low ? 'var(--red)' : (pct > 70 ? 'var(--green)' : 'var(--amber)');
+    const card = document.createElement('div');
+    card.className = 'lager-card ' + (low ? 'low' : 'ok');
+    card.dataset.id = p.id;
+    const reasonOptions = AUSBUCH_GRUENDE.map(g => `<option value="${g}">${g}</option>`).join('');
+    card.innerHTML = `
+      <div class="lager-card-top">
+        <div class="lager-avatar">${CAT_ICONS[p.category] || '📦'}</div>
+        <div class="lager-card-info">
+          <div class="lname">${p.name}${ALCOHOL_IDS.has(p.id) ? ' <span class="ci-age">18+</span>' : ''}</div>
+          <div class="lmeta">Nr. ${p.id} · ${p.category}${packSize(p) > 1 ? ` · Gebinde ${packSize(p)}×` : ''}</div>
+        </div>
+        <div class="lager-card-numbers">
+          <div class="lstock ${low ? 'low' : 'ok'}">${bestand}</div>
+          <div class="lmelde">Meldebestand ${MELDEBESTAND}</div>
+        </div>
+      </div>
+      <div class="lager-bar-track"><div class="lager-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
+      <div class="lager-actions-row">
+        <input type="number" min="1" placeholder="Menge" class="lz-qty">
+        <select class="lz-reason">${reasonOptions}</select>
+        <button class="lz-out">− Ausbuchen</button>
+        <button class="lz-in">＋ Einbuchen</button>
       </div>
     `;
-    const input = row.querySelector('input');
-    const btn = row.querySelector('button');
-    const doRestock = () => {
-      const val = parseInt(input.value, 10);
+    const qtyInput = card.querySelector('.lz-qty');
+    const reasonSelect = card.querySelector('.lz-reason');
+
+    const doEinbuchen = () => {
+      const val = parseInt(qtyInput.value, 10);
       if (!val || val <= 0){
         showToast('Bitte eine gültige Menge eingeben.');
         return;
       }
       adjustStock(p.id, val, 'Wareneingang (Lager)');
-      input.value = '';
-      renderGrid();
-      renderLagerTable();
-      const newRow = wrap.querySelector(`.lager-row[data-id="${p.id}"]`);
-      if (newRow){
-        newRow.classList.add('just-added');
-        setTimeout(() => newRow.classList.remove('just-added'), 800);
-      }
+      qtyInput.value = '';
+      playScanSound();
       showToast(`+${val} × ${p.name} eingebucht — neuer Bestand: ${stock[p.id]}`);
+      renderGrid();
+      renderLagerCards(p.id, 'added');
     };
-    btn.onclick = doRestock;
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') doRestock(); });
-    wrap.appendChild(row);
+
+    const doAusbuchen = () => {
+      const val = parseInt(qtyInput.value, 10);
+      if (!val || val <= 0){
+        showToast('Bitte eine gültige Menge eingeben.');
+        return;
+      }
+      if (val > stock[p.id]){
+        playErrorSound();
+        showToast(`Nur ${stock[p.id]} Stk. von ${p.name} auf Lager — Ausbuchung nicht möglich.`);
+        return;
+      }
+      const grund = reasonSelect.value;
+      adjustStock(p.id, -val, grund + ' (Lager)');
+      qtyInput.value = '';
+      playStornoSound();
+      showToast(`−${val} × ${p.name} ausgebucht (${grund}) — neuer Bestand: ${stock[p.id]}`);
+      renderGrid();
+      renderLagerCards(p.id, 'removed');
+    };
+
+    card.querySelector('.lz-in').onclick = doEinbuchen;
+    card.querySelector('.lz-out').onclick = doAusbuchen;
+    qtyInput.addEventListener('keydown', e => { if (e.key === 'Enter') doEinbuchen(); });
+
+    if (flashId === p.id){
+      card.classList.add(flashType === 'removed' ? 'just-removed' : 'just-added');
+      setTimeout(() => card.classList.remove('just-added', 'just-removed'), 800);
+    }
+    wrap.appendChild(card);
   });
 }
 
 document.getElementById('lagerBtn').addEventListener('click', () => {
-  renderLagerTable();
+  lagerCategory = 'Alle';
+  lagerLowOnly = false;
+  lagerSearchTerm = '';
+  document.getElementById('lagerSearch').value = '';
+  document.getElementById('lagerLowToggle').classList.remove('active');
+  renderLagerCatChips();
+  renderLagerCards();
   document.getElementById('lagerOverlay').classList.add('show');
 });
 document.getElementById('lagerCloseBtn').addEventListener('click', () => {
@@ -1734,7 +1976,12 @@ document.getElementById('lagerCloseBtn').addEventListener('click', () => {
 });
 document.getElementById('lagerSearch').addEventListener('input', e => {
   lagerSearchTerm = e.target.value;
-  renderLagerTable();
+  renderLagerCards();
+});
+document.getElementById('lagerLowToggle').addEventListener('click', () => {
+  lagerLowOnly = !lagerLowOnly;
+  document.getElementById('lagerLowToggle').classList.toggle('active', lagerLowOnly);
+  renderLagerCards();
 });
 
 // ---- Alterssperre ----
