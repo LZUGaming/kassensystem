@@ -99,6 +99,43 @@ html,body{
   font-family:'Inter',sans-serif;
 }
 .lager-btn:hover{ border-color: var(--teal); }
+.menu-wrap{ position:relative; }
+.menu-dropdown{
+  position:absolute;
+  top: calc(100% + 8px);
+  right:0;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:210px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.4);
+  opacity:0;
+  transform: translateY(-6px);
+  pointer-events:none;
+  transition: all .15s ease;
+  z-index:40;
+}
+.menu-dropdown.open{
+  opacity:1;
+  transform: translateY(0);
+  pointer-events:all;
+}
+.menu-dropdown button{
+  background: transparent;
+  border:none;
+  color: var(--text);
+  text-align:left;
+  padding: 9px 10px;
+  border-radius:7px;
+  font-size:12.5px;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.menu-dropdown button:hover{ background: var(--panel); color: var(--teal); }
 
 /* ===== SIDEBAR (categories) ===== */
 .sidebar{
@@ -918,11 +955,16 @@ html,body{
       <h1>MARKT<span>/24</span> · KASSE 03</h1>
     </div>
     <div class="header-right">
-      <button class="lager-btn" id="drawerBtn">🗄 Lade</button>
-      <button class="lager-btn" id="movesBtn">📜 Ein/Ausgänge</button>
-      <button class="lager-btn" id="bonsBtn">🧾 Bons</button>
-      <button class="lager-btn" id="reportBtn">📊 Bericht</button>
-      <button class="lager-btn" id="lagerBtn">📦 Lager</button>
+      <div class="menu-wrap">
+        <button class="lager-btn" id="menuBtn">☰ Verwaltung</button>
+        <div class="menu-dropdown" id="menuDropdown">
+          <button id="drawerBtn">🗄 Kassenlade öffnen</button>
+          <button id="movesBtn">📜 Ein-/Ausgänge</button>
+          <button id="bonsBtn">🧾 Bons</button>
+          <button id="reportBtn">📊 Tagesabschluss</button>
+          <button id="lagerBtn">📦 Lagerverwaltung</button>
+        </div>
+      </div>
       <div class="kasse-id" id="itemCount">0 Artikel</div>
       <div class="clock" id="clock">--:--:--</div>
     </div>
@@ -1179,10 +1221,17 @@ function tone(freq, duration, type, delay, gainVal){
     const ctx = getAudioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = type || 'sine';
+    osc.type = type || 'square';
     osc.frequency.value = freq;
     const startTime = ctx.currentTime + (delay || 0);
-    gain.gain.setValueAtTime(gainVal || SOUND_GAIN, startTime);
+    const g = gainVal || SOUND_GAIN;
+    // Fester Attack + Hold, danach Decay — so klingen auch kurze Töne genauso
+    // laut wie lange, statt sofort ab dem Start leiser zu werden.
+    const attack = 0.008;
+    const hold = Math.max(duration - 0.03, attack);
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(g, startTime + attack);
+    gain.gain.setValueAtTime(g, startTime + hold);
     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -1190,15 +1239,17 @@ function tone(freq, duration, type, delay, gainVal){
     osc.stop(startTime + duration + 0.02);
   } catch(e){ /* Audio nicht verfügbar — Kasse funktioniert stumm weiter */ }
 }
-const SOUND_GAIN = 0.3; // einheitliche Lautstärke für alle Kassentöne
-function playScanSound(){ tone(1300, 0.09, 'square', 0, SOUND_GAIN); }
-function playErrorSound(){ tone(280, 0.13, 'sawtooth', 0, SOUND_GAIN); tone(200, 0.16, 'sawtooth', 0.13, SOUND_GAIN); }
-function playStornoSound(){ tone(520, 0.07, 'triangle', 0, SOUND_GAIN); tone(340, 0.1, 'triangle', 0.07, SOUND_GAIN); }
-function playDrawerSound(){ tone(140, 0.2, 'square', 0, SOUND_GAIN); tone(90, 0.22, 'square', 0.05, SOUND_GAIN); }
+const SOUND_GAIN = 0.28; // einheitliche Lautstärke für alle Kassentöne
+// Alle Töne nutzen bewusst dieselbe Wellenform ('square') und Lautstärke —
+// unterscheidbar bleiben sie nur über Tonhöhe/Abfolge, nicht über Klangfarbe/Pegel.
+function playScanSound(){ tone(1300, 0.1, 'square', 0, SOUND_GAIN); }
+function playErrorSound(){ tone(280, 0.13, 'square', 0, SOUND_GAIN); tone(200, 0.16, 'square', 0.13, SOUND_GAIN); }
+function playStornoSound(){ tone(520, 0.11, 'square', 0, SOUND_GAIN); tone(340, 0.13, 'square', 0.09, SOUND_GAIN); }
+function playDrawerSound(){ tone(140, 0.16, 'square', 0, SOUND_GAIN); tone(90, 0.18, 'square', 0.06, SOUND_GAIN); }
 function playCashSound(){
-  tone(660, 0.09, 'sine', 0, SOUND_GAIN);
-  tone(880, 0.09, 'sine', 0.08, SOUND_GAIN);
-  tone(1320, 0.18, 'sine', 0.16, SOUND_GAIN);
+  tone(660, 0.11, 'square', 0, SOUND_GAIN);
+  tone(880, 0.11, 'square', 0.08, SOUND_GAIN);
+  tone(1320, 0.13, 'square', 0.16, SOUND_GAIN);
   playDrawerSound();
 }
 
@@ -1264,6 +1315,22 @@ document.querySelectorAll('.pm-btn').forEach(b => {
     document.querySelectorAll('.pm-btn').forEach(x => x.classList.toggle('active', x.dataset.method === paymentMethod));
     renderSummary();
   });
+});
+
+// ---- Verwaltungsmenü (Dropdown) ----
+const menuBtn = document.getElementById('menuBtn');
+const menuDropdown = document.getElementById('menuDropdown');
+menuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  menuDropdown.classList.toggle('open');
+});
+menuDropdown.addEventListener('click', () => {
+  menuDropdown.classList.remove('open');
+});
+document.addEventListener('click', (e) => {
+  if (!menuDropdown.contains(e.target) && e.target !== menuBtn){
+    menuDropdown.classList.remove('open');
+  }
 });
 
 // ---- Letzten Artikel stornieren ----
