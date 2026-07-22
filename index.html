@@ -1385,7 +1385,7 @@ html,body{
         </div>
       </div>
       <div class="cash-total" id="cashTotalDisplay" title="Aktueller Kassenbestand">💶 0,00 €</div>
-      <button id="lizardBtn" class="lizard-btn no-key-sound" title="Gedrückt halten…">🦎</button>
+      <button id="lizardBtn" class="lizard-btn no-key-sound" title="Lizard-Sound abspielen">🦎</button>
       <div class="kasse-id" id="itemCount">0 Artikel</div>
       <div class="clock" id="clock">--:--:--</div>
     </div>
@@ -1735,7 +1735,6 @@ function getQuackAudio(){
 function getLizardAudio(){
   if (!lizardAudioEl){
     lizardAudioEl = new Audio(LIZARD_AUDIO_SRC);
-    lizardAudioEl.loop = true;
   }
   return lizardAudioEl;
 }
@@ -1951,26 +1950,15 @@ document.getElementById('drawerAnimOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'drawerAnimOverlay') closeDrawerAnim();
 });
 
-// ---- Lizard-Taste: macht "Lizard", solange man draufdrückt (loopt), stoppt beim Loslassen ----
+// ---- Lizard-Taste: einmal drücken = einmal abspielen (kein Halten nötig) ----
 const lizardBtn = document.getElementById('lizardBtn');
-function startLizard(e){
-  if (e) e.preventDefault();
-  lizardBtn.classList.add('pressed');
+lizardBtn.addEventListener('click', () => {
   const a = getLizardAudio();
   a.currentTime = 0;
   a.play().catch(() => {});
-}
-function stopLizard(){
-  lizardBtn.classList.remove('pressed');
-  if (lizardAudioEl){
-    lizardAudioEl.pause();
-    lizardAudioEl.currentTime = 0;
-  }
-}
-lizardBtn.addEventListener('pointerdown', startLizard);
-lizardBtn.addEventListener('pointerup', stopLizard);
-lizardBtn.addEventListener('pointerleave', stopLizard);
-lizardBtn.addEventListener('pointercancel', stopLizard);
+  lizardBtn.classList.add('pressed');
+  setTimeout(() => lizardBtn.classList.remove('pressed'), 180);
+});
 
 // ---- product grid ----
 function renderGrid(){
@@ -2278,12 +2266,6 @@ function buildReceiptHtml(tx){
       <div class="receipt-line"><span>Gegeben</span><span>${fmt(tx.given)}</span></div>
       <div class="receipt-line"><span>Rückgeld</span><span>${fmt(tx.change)}</span></div>
     `;
-    if (tx.changeBreakdown && tx.changeBreakdown.length > 0){
-      html += `<hr><div class="receipt-line"><span style="font-weight:700;">Rückgeld ausgeben:</span><span></span></div>`;
-      tx.changeBreakdown.forEach(p => {
-        html += `<div class="receipt-line"><span class="rname">${p.count}× ${p.label}${p.shortage ? ' (Bestand knapp!)' : ''}</span></div>`;
-      });
-    }
   }
   html += `<div class="rfoot">Danke für Ihren Einkauf!<br>MARKT/24 · Kundenservice: 0800 / 24 24 24</div>`;
   return html;
