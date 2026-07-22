@@ -449,6 +449,13 @@ html,body{
   border-radius:5px;
   letter-spacing:.3px;
 }
+.duck-badge{
+  position:absolute;
+  top:6px; right:8px;
+  font-size:15px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));
+  cursor:help;
+}
 .product .pname{
   font-size:12.5px;
   font-weight:600;
@@ -1351,7 +1358,7 @@ html,body{
       <div class="menu-wrap">
         <button class="lager-btn" id="menuBtn">☰ Verwaltung</button>
         <div class="menu-dropdown" id="menuDropdown">
-          <button id="drawerBtn">🗄 Kassenlade öffnen</button>
+          <button id="drawerBtn" class="no-key-sound">🗄 Kassenlade öffnen</button>
           <button id="cashBtn">💶 Kassenbestand</button>
           <button id="movesBtn">📜 Ein-/Ausgänge</button>
           <button id="bonsBtn">🧾 Bons</button>
@@ -1384,7 +1391,7 @@ html,body{
       <div class="total-num" id="totalDisplay">0,00 €</div>
     </div>
     <div class="cart-tools">
-      <button id="undoBtn" disabled>↩ Letzten Artikel stornieren</button>
+      <button id="undoBtn" class="no-key-sound" disabled>↩ Letzten Artikel stornieren</button>
     </div>
     <div class="cart-list" id="cartList">
       <div class="cart-empty">Warenkorb leer.<br>Artikel antippen oder Nummer scannen.</div>
@@ -1413,8 +1420,8 @@ html,body{
       <div class="change-row" id="changeRow"><span>Rückgeld</span><span class="val" id="changeVal">0,00 €</span></div>
       <div class="change-breakdown" id="changeBreakdown"></div>
       <div class="actions">
-        <button class="btn btn-clear" id="clearBtn">Storno</button>
-        <button class="btn btn-pay" id="payBtn" disabled>Zahlung abschließen</button>
+        <button class="btn btn-clear no-key-sound" id="clearBtn">Storno</button>
+        <button class="btn btn-pay no-key-sound" id="payBtn" disabled>Zahlung abschließen</button>
       </div>
     </div>
   </div>
@@ -1446,8 +1453,8 @@ html,body{
     <h2>Alterskontrolle</h2>
     <p id="ageText">Dieser Artikel enthält Alkohol.</p>
     <div class="age-actions">
-      <button class="age-no" id="ageNoBtn">Nein / Abbrechen</button>
-      <button class="age-yes" id="ageYesBtn">Ja, 18 Jahre oder älter</button>
+      <button class="age-no no-key-sound" id="ageNoBtn">Nein / Abbrechen</button>
+      <button class="age-yes no-key-sound" id="ageYesBtn">Ja, 18 Jahre oder älter</button>
     </div>
   </div>
 </div>
@@ -1493,7 +1500,7 @@ html,body{
       <div id="cashTable"></div>
     </div>
     <div class="cash-reset-row">
-      <button id="cashResetBtn">↺ Anfangsbestand (250,00 €) neu einlegen</button>
+      <button id="cashResetBtn" class="no-key-sound">↺ Anfangsbestand (250,00 €) neu einlegen</button>
     </div>
   </div>
 </div>
@@ -1731,7 +1738,7 @@ function tone(freq, duration, type, delay, gainVal){
 const SOUND_GAIN = 0.28; // einheitliche Lautstärke für alle Kassentöne
 // Alle Töne nutzen bewusst dieselbe Wellenform ('square') und Lautstärke —
 // unterscheidbar bleiben sie nur über Tonhöhe/Abfolge, nicht über Klangfarbe/Pegel.
-function playScanSound(){ tone(1300, 0.1, 'square', 0, SOUND_GAIN); }
+function playScanSound(){ tone(1450, 0.06, 'square', 0, SOUND_GAIN); tone(2000, 0.05, 'square', 0.045, SOUND_GAIN * 0.8); }
 function playErrorSound(){ tone(280, 0.13, 'square', 0, SOUND_GAIN); tone(200, 0.16, 'square', 0.13, SOUND_GAIN); }
 function playStornoSound(){ tone(520, 0.11, 'square', 0, SOUND_GAIN); tone(340, 0.13, 'square', 0.09, SOUND_GAIN); }
 function playDrawerSound(){ tone(140, 0.16, 'square', 0, SOUND_GAIN); tone(90, 0.18, 'square', 0.06, SOUND_GAIN); }
@@ -1740,6 +1747,55 @@ function playCashSound(){
   tone(880, 0.11, 'square', 0.08, SOUND_GAIN);
   tone(1320, 0.13, 'square', 0.16, SOUND_GAIN);
   playDrawerSound();
+}
+// Leiser, knackiger Tastenklick für allgemeine Buttons (Menü, Kategorien, Chips, Stückelung …).
+// Leichte Zufallsstreuung in der Tonhöhe, damit es nicht wie ein Roboter-Dauerklick klingt.
+function playKeySound(){
+  const freq = 1500 + (Math.random() * 180 - 90);
+  tone(freq, 0.04, 'square', 0, SOUND_GAIN * 0.55);
+}
+// Altes mechanisches Bondrucker-Rattern beim Ausgeben des Kassenzettels: Papiervorschub-Ticks,
+// dann ein Klingeln + Abriss am Ende.
+function playReceiptPrintSound(){
+  const ticks = 9;
+  for (let i = 0; i < ticks; i++){
+    const delay = i * 0.08;
+    tone(1700 + (Math.random() * 260 - 130), 0.03, 'square', delay, SOUND_GAIN * 0.5);
+    tone(130 + (Math.random() * 25), 0.045, 'square', delay, SOUND_GAIN * 0.45);
+  }
+  const endDelay = ticks * 0.08 + 0.06;
+  tone(950, 0.16, 'square', endDelay, SOUND_GAIN * 0.7);
+  tone(550, 0.12, 'square', endDelay + 0.06, SOUND_GAIN * 0.5);
+}
+// Easter Egg: ein Artikel quakt beim Antippen wie eine Ente, statt zu piepen.
+const DUCK_PRODUCT_ID = PRODUCTS[0].id;
+function playDuckSound(){
+  try{
+    const ctx = getAudioCtx();
+    const g = SOUND_GAIN;
+    function quack(startDelay, pitchStart, pitchEnd, dur, vol){
+      const osc = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc2.type = 'square';
+      osc2.detune.value = 20;
+      const startTime = ctx.currentTime + startDelay;
+      osc.frequency.setValueAtTime(pitchStart, startTime);
+      osc.frequency.exponentialRampToValueAtTime(pitchEnd, startTime + dur);
+      osc2.frequency.setValueAtTime(pitchStart, startTime);
+      osc2.frequency.exponentialRampToValueAtTime(pitchEnd, startTime + dur);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(vol, startTime + 0.012);
+      gain.gain.setValueAtTime(vol, startTime + dur * 0.55);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+      osc.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+      osc.start(startTime); osc2.start(startTime);
+      osc.stop(startTime + dur + 0.02); osc2.stop(startTime + dur + 0.02);
+    }
+    quack(0, 950, 280, 0.14, g);
+    quack(0.17, 750, 240, 0.1, g * 0.75);
+  } catch(e){ /* Audio nicht verfügbar */ }
 }
 
 // ---- clock ----
@@ -1896,10 +1952,12 @@ function renderGrid(){
     const remaining = stock[p.id];
     const pack = packSize(p);
     const isAlcohol = ALCOHOL_IDS.has(p.id);
+    const isDuck = p.id === DUCK_PRODUCT_ID;
     const el = document.createElement('div');
     el.className = 'product' + (remaining <= MELDEBESTAND - 10 ? ' low' : '') + (isAlcohol ? ' alcohol' : '');
     el.innerHTML = `
       ${isAlcohol ? '<div class="age-badge">18+</div>' : ''}
+      ${isDuck ? '<div class="duck-badge" title="Klingt anders…">🦆</div>' : ''}
       <div class="pname">${p.name}</div>
       <div class="pid">Nr. ${p.id}${pack > 1 ? ` · Gebinde ${pack}×` : ''}</div>
       <div class="pmeta">
@@ -1931,7 +1989,7 @@ function addToCart(id){
     cart[id] = (cart[id] || 0) + pack;
     adjustStock(id, -pack, 'Verkauf (Warenkorb)');
     cartOrder.push({id, units: pack});
-    playScanSound();
+    if (id === DUCK_PRODUCT_ID) playDuckSound(); else playScanSound();
     renderAll();
   };
   if (ALCOHOL_IDS.has(id)){
@@ -1955,7 +2013,7 @@ function changeQty(id, deltaPacks){
     adjustStock(id, -deltaUnits, deltaUnits > 0 ? 'Verkauf (Warenkorb +)' : 'Warenkorb-Korrektur (−)');
     if (deltaUnits > 0){
       cartOrder.push({id, units: deltaUnits});
-      playScanSound();
+      if (id === DUCK_PRODUCT_ID) playDuckSound(); else playScanSound();
     } else {
       for (let i = cartOrder.length - 1; i >= 0; i--){
         if (cartOrder[i].id === id){ cartOrder.splice(i, 1); break; }
@@ -2026,9 +2084,9 @@ function renderCart(){
         <div class="ci-sub">${subLabel}</div>
       </div>
       <div class="ci-qty">
-        <button data-act="minus">−</button>
+        <button data-act="minus" class="no-key-sound">−</button>
         <span>${qtyLabel} ${qtyUnit}</span>
-        <button data-act="plus">+</button>
+        <button data-act="plus" class="no-key-sound">+</button>
       </div>
       <div class="ci-line">${fmt(line)}</div>
       <div class="ci-remove">Stornieren</div>
@@ -2235,7 +2293,12 @@ document.getElementById('payBtn').addEventListener('click', () => {
   };
   transactions.push(tx);
 
-  playCashSound();
+  if (paymentMethod === 'bar'){
+    playCashSound();
+    setTimeout(playReceiptPrintSound, 280);
+  } else {
+    playReceiptPrintSound();
+  }
   document.getElementById('receiptBody').innerHTML = buildReceiptHtml(tx) +
     '<button class="receipt-close" id="closeReceipt">Neuer Kunde</button>';
   document.getElementById('overlay').classList.add('show');
@@ -2340,8 +2403,8 @@ function renderLagerCards(flashId, flashType){
       <div class="lager-actions-row">
         <input type="number" min="1" placeholder="Menge" class="lz-qty">
         <select class="lz-reason">${reasonOptions}</select>
-        <button class="lz-out">− Ausbuchen</button>
-        <button class="lz-in">＋ Einbuchen</button>
+        <button class="lz-out no-key-sound">− Ausbuchen</button>
+        <button class="lz-in no-key-sound">＋ Einbuchen</button>
       </div>
     `;
     const qtyInput = card.querySelector('.lz-qty');
@@ -2495,7 +2558,7 @@ function renderBonsTable(){
       <div class="bstatus ${tx.voided ? 'void' : 'paid'}">${tx.voided ? 'Storniert' : (tx.method === 'karte' ? 'Karte' : 'Bar')}</div>
       <div class="bactions">
         <button data-act="view">Anzeigen</button>
-        ${tx.voided ? '' : '<button data-act="void" class="void-btn">Stornieren</button>'}
+        ${tx.voided ? '' : '<button data-act="void" class="void-btn no-key-sound">Stornieren</button>'}
       </div>
     `;
     row.querySelector('[data-act="view"]').onclick = () => {
@@ -2660,6 +2723,14 @@ async function initApp(){
   await resetDatabaseToDefaults();
   renderAll();
 }
+// ---- Genereller Tastenklick für alle Buttons, die noch keinen eigenen Sound haben ----
+// Capture-Phase, damit ein späteres e.stopPropagation() (z.B. beim Menü-Button) den Sound nicht blockiert.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn || btn.classList.contains('no-key-sound')) return;
+  playKeySound();
+}, true);
+
 initApp();
 </script>
 </body>
