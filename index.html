@@ -1451,6 +1451,52 @@ html,body{
   text-align:center;
   padding: 30px 0;
 }
+.we-action-row{
+  padding: 4px 18px 12px 18px;
+}
+.we-fill-btn{
+  width:100%;
+  background: rgba(255,176,32,0.12);
+  border:1px solid var(--amber);
+  color: var(--amber);
+  padding: 12px 0;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;
+}
+.we-fill-btn:hover{ filter:brightness(1.15); }
+.we-fill-btn:disabled{ opacity:.4; cursor:not-allowed; filter:none; }
+.we-history-label{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  color: var(--muted);
+  padding: 0 18px 6px 18px;
+}
+.we-row{
+  display:grid;
+  grid-template-columns: 0.7fr 1fr 1fr 0.8fr 1fr;
+  gap:8px;
+  align-items:center;
+  padding: 9px 8px;
+  border-bottom:1px solid var(--line);
+  font-size:12px;
+}
+.we-row .wenr{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.we-row .wetime{ color: var(--muted); font-size:11px; }
+.we-row .wecount{ font-family:'Space Grotesk',sans-serif; font-weight:600; }
+.we-row button{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--text);
+  padding: 5px 10px;
+  border-radius:6px;
+  font-size:10.5px;
+  cursor:pointer;
+}
+.we-row button:hover{ border-color: var(--teal); }
 
 .move-row{
   display:grid;
@@ -1546,6 +1592,7 @@ html,body{
         <div class="menu-dropdown" id="menuDropdown">
           <button id="drawerBtn" class="no-key-sound">🗄 Kassenlade öffnen</button>
           <button id="cashBtn">💶 Kassenbestand</button>
+          <button id="wareneingangBtn">📥 Wareneingang</button>
           <button id="movesBtn">📜 Ein-/Ausgänge</button>
           <button id="bonsBtn">🧾 Bons</button>
           <button id="reportBtn">📊 Tagesabschluss</button>
@@ -1733,6 +1780,27 @@ html,body{
       <div class="drawer-tray-total" id="drawerTrayTotal"></div>
     </div>
   </div>
+</div>
+
+<div class="overlay" id="wareneingangOverlay">
+  <div class="lager-panel">
+    <div class="lager-head">
+      <h2>📥 Wareneingang</h2>
+      <button id="wareneingangCloseBtn">✕</button>
+    </div>
+    <div class="lager-stats" id="weStats"></div>
+    <div class="we-action-row">
+      <button class="we-fill-btn" id="weFillBtn">▶ Jetzt automatisch auf Meldebestand-Niveau auffüllen</button>
+    </div>
+    <div class="we-history-label">Bisherige Wareneingänge (diese Sitzung)</div>
+    <div class="lager-table-wrap">
+      <div id="weHistoryTable"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="weDocOverlay">
+  <div class="receipt" id="weDocBody"></div>
 </div>
 
 <div class="overlay" id="cashOverlay">
@@ -2563,6 +2631,133 @@ document.getElementById('payBtn').addEventListener('click', () => {
     renderAll();
   };
 });
+
+// ---- Wareneingang: automatische Auffüllung + Beleg-Erstellung ----
+let wareneingangDocs = [];
+let weDocCounter = 5000;
+
+function countLowStock(){
+  return PRODUCTS.filter(p => stock[p.id] <= MELDEBESTAND).length;
+}
+function neededUnitsTotal(){
+  return PRODUCTS.reduce((sum, p) => {
+    const need = REFERENZ_BESTAND - stock[p.id];
+    return sum + (stock[p.id] <= MELDEBESTAND && need > 0 ? need : 0);
+  }, 0);
+}
+
+function renderWeStats(){
+  const lowCount = countLowStock();
+  const needed = neededUnitsTotal();
+  document.getElementById('weStats').innerHTML = `
+    <div class="lager-stat ${lowCount > 0 ? 'warn' : 'good'}">
+      <div class="lsnum">${lowCount}</div>
+      <div class="lslabel">Artikel unter Meldebestand</div>
+    </div>
+    <div class="lager-stat">
+      <div class="lsnum">${needed}</div>
+      <div class="lslabel">Stück würden nachgeliefert</div>
+    </div>
+  `;
+  document.getElementById('weFillBtn').disabled = lowCount === 0;
+  document.getElementById('weFillBtn').textContent = lowCount === 0
+    ? '✓ Alle Artikel über Meldebestand'
+    : `▶ Jetzt automatisch auffüllen (${lowCount} Artikel)`;
+}
+
+function buildWeDocHtml(doc){
+  let html = `
+    <h2>WARENEINGANG</h2>
+    <div class="sub">Beleg Nr. ${doc.id} · Automatische Auffüllung<br>${doc.date} ${doc.time}</div>
+    <hr>
+  `;
+  doc.items.forEach(it => {
+    html += `<div class="receipt-line"><span class="rname">${it.name} (Nr. ${it.id})</span><span>${it.before} → ${it.after}</span></div>`;
+    html += `<div class="receipt-line"><span style="color:#666;">+${it.added} Stk. nachgeliefert</span><span></span></div>`;
+  });
+  html += `
+    <hr>
+    <div class="rtotal"><span>Artikel aufgefüllt</span><span>${doc.items.length}</span></div>
+    <div class="rtotal"><span>Stück gesamt</span><span>${doc.totalUnits}</span></div>
+    <div class="rfoot">Simulierter Wareneingang · MARKT/24<br>Ziel-Bestand je Artikel: ${REFERENZ_BESTAND} Stk.</div>
+    <button class="receipt-close" id="weDocCloseBtn2">Schließen</button>
+  `;
+  return html;
+}
+
+function showWeDoc(doc){
+  document.getElementById('weDocBody').innerHTML = buildWeDocHtml(doc);
+  document.getElementById('weDocOverlay').classList.add('show');
+  document.getElementById('weDocCloseBtn2').onclick = () => {
+    document.getElementById('weDocOverlay').classList.remove('show');
+  };
+}
+
+function renderWeHistory(){
+  const wrap = document.getElementById('weHistoryTable');
+  wrap.innerHTML = '';
+  if (wareneingangDocs.length === 0){
+    wrap.innerHTML = '<div class="bons-empty">Noch keine automatische Auffüllung durchgeführt.</div>';
+    return;
+  }
+  wareneingangDocs.slice().reverse().forEach(doc => {
+    const row = document.createElement('div');
+    row.className = 'we-row';
+    row.innerHTML = `
+      <div class="wenr">#${doc.id}</div>
+      <div class="wetime">${doc.date}<br>${doc.time}</div>
+      <div class="wecount">${doc.items.length} Artikel</div>
+      <div class="wecount">+${doc.totalUnits} Stk.</div>
+      <div><button data-act="view">Beleg anzeigen</button></div>
+    `;
+    row.querySelector('[data-act="view"]').onclick = () => showWeDoc(doc);
+    wrap.appendChild(row);
+  });
+}
+
+function runAutoRestock(){
+  const items = [];
+  PRODUCTS.forEach(p => {
+    const before = stock[p.id];
+    if (before <= MELDEBESTAND){
+      const needed = REFERENZ_BESTAND - before;
+      if (needed > 0){
+        adjustStock(p.id, needed, 'Automatische Auffüllung (Wareneingang)');
+        items.push({id: p.id, name: p.name, before, added: needed, after: stock[p.id]});
+      }
+    }
+  });
+  if (items.length === 0){
+    showToast('Kein Artikel benötigt aktuell eine Auffüllung.');
+    return;
+  }
+  weDocCounter += 1;
+  const now = new Date();
+  const doc = {
+    id: weDocCounter,
+    date: now.toLocaleDateString('de-DE'),
+    time: now.toLocaleTimeString('de-DE'),
+    items,
+    totalUnits: items.reduce((s, it) => s + it.added, 0)
+  };
+  wareneingangDocs.push(doc);
+  playCashSound();
+  showToast(`Wareneingang gebucht: ${items.length} Artikel aufgefüllt (+${doc.totalUnits} Stk.).`);
+  renderGrid();
+  renderWeStats();
+  renderWeHistory();
+  showWeDoc(doc);
+}
+
+document.getElementById('wareneingangBtn').addEventListener('click', () => {
+  renderWeStats();
+  renderWeHistory();
+  document.getElementById('wareneingangOverlay').classList.add('show');
+});
+document.getElementById('wareneingangCloseBtn').addEventListener('click', () => {
+  document.getElementById('wareneingangOverlay').classList.remove('show');
+});
+document.getElementById('weFillBtn').addEventListener('click', runAutoRestock);
 
 // ---- Lager / Bestandsverwaltung ----
 let lagerSearchTerm = '';
