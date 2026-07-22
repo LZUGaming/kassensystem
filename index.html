@@ -1089,6 +1089,59 @@ html,body{
 .move-row .mreason{ color: var(--muted); font-size:11px; }
 .move-row .mtime{ color: var(--muted); font-size:10.5px; }
 
+.cash-row{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap:8px;
+  align-items:center;
+  padding: 8px 8px;
+  border-bottom:1px solid var(--line);
+  font-size:12.5px;
+}
+.cash-row .cdenom{ font-weight:700; font-family:'Space Grotesk',sans-serif; }
+.cash-row .ccount{ color: var(--muted); }
+.cash-row .csub{ text-align:right; font-family:'Space Grotesk',sans-serif; font-weight:600; }
+.cash-row.empty{ opacity:.4; }
+.cash-reset-row{
+  padding: 10px 18px 16px 18px;
+  border-top:1px solid var(--line);
+}
+.cash-reset-row button{
+  width:100%;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  color: var(--muted);
+  padding: 10px 0;
+  border-radius:8px;
+  font-size:12.5px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.cash-reset-row button:hover{ border-color: var(--amber); color: var(--amber); }
+
+.change-breakdown{
+  font-size:11.5px;
+  color: var(--muted);
+  padding: 2px 2px 0 2px;
+  line-height:1.5;
+}
+.change-breakdown .cb-chip{
+  display:inline-block;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:5px;
+  padding:2px 7px;
+  margin:2px 4px 2px 0;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;
+  color: var(--text);
+}
+.change-breakdown .cb-chip.shortage{
+  border-color: var(--red);
+  color: var(--red);
+}
+
 ::-webkit-scrollbar{ width:8px; height:8px; }
 ::-webkit-scrollbar-thumb{ background: var(--line); border-radius:4px; }
 ::-webkit-scrollbar-track{ background: transparent; }
@@ -1106,6 +1159,7 @@ html,body{
         <button class="lager-btn" id="menuBtn">☰ Verwaltung</button>
         <div class="menu-dropdown" id="menuDropdown">
           <button id="drawerBtn">🗄 Kassenlade öffnen</button>
+          <button id="cashBtn">💶 Kassenbestand</button>
           <button id="movesBtn">📜 Ein-/Ausgänge</button>
           <button id="bonsBtn">🧾 Bons</button>
           <button id="reportBtn">📊 Tagesabschluss</button>
@@ -1161,6 +1215,7 @@ html,body{
       </div>
       <div class="quick-cash" id="quickCash"></div>
       <div class="change-row" id="changeRow"><span>Rückgeld</span><span class="val" id="changeVal">0,00 €</span></div>
+      <div class="change-breakdown" id="changeBreakdown"></div>
       <div class="actions">
         <button class="btn btn-clear" id="clearBtn">Storno</button>
         <button class="btn btn-pay" id="payBtn" disabled>Zahlung abschließen</button>
@@ -1215,6 +1270,22 @@ html,body{
   </div>
 </div>
 
+<div class="overlay" id="cashOverlay">
+  <div class="lager-panel">
+    <div class="lager-head">
+      <h2>💶 Kassenbestand</h2>
+      <button id="cashCloseBtn">✕</button>
+    </div>
+    <div class="lager-stats" id="cashStats"></div>
+    <div class="lager-table-wrap">
+      <div id="cashTable"></div>
+    </div>
+    <div class="cash-reset-row">
+      <button id="cashResetBtn">↺ Anfangsbestand (250,00 €) neu einlegen</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="movesOverlay">
   <div class="lager-panel">
     <div class="lager-head">
@@ -1257,10 +1328,85 @@ let db = null;
 let dbReady = false;
 let movementLog = [];
 
+// ---- Kassenbestand (Wechselgeld) — Stückelung nach Euro-Nennwerten ----
+const DENOMINATIONS = [
+  {cents:50000, label:'500 €'}, {cents:20000, label:'200 €'}, {cents:10000, label:'100 €'},
+  {cents:5000,  label:'50 €'},  {cents:2000,  label:'20 €'},  {cents:1000, label:'10 €'}, {cents:500, label:'5 €'},
+  {cents:200,   label:'2 €'},   {cents:100,   label:'1 €'},
+  {cents:50,    label:'50 ct'}, {cents:20,    label:'20 ct'}, {cents:10,   label:'10 ct'},
+  {cents:5,     label:'5 ct'},  {cents:2,     label:'2 ct'},  {cents:1,    label:'1 ct'}
+];
+// Anfangsbestand Kasse: 250,00 € — selbst gestückelt, viele kleine Scheine/Münzen fürs Wechselgeld
+function initialDrawerFill(){
+  return {
+    50000:0, 20000:0, 10000:0,
+    5000:2,  2000:4,  1000:3, 500:4,
+    200:5,   100:5,
+    50:6,    20:5,    10:5,
+    5:4,     2:10,    1:10
+  };
+}
+let cashDrawer = initialDrawerFill();
+
+function drawerTotalCents(){
+  return DENOMINATIONS.reduce((s,d) => s + d.cents * (cashDrawer[d.cents] || 0), 0);
+}
+
+// Stückelt einen Centbetrag möglichst groß zuerst, begrenzt auf tatsächlich vorhandene Stückzahl im Schub.
+// Reicht der Bestand nicht, wird der Rest trotzdem sinnvoll aufgeschlüsselt (als "shortage" markiert).
+function breakdownChange(amountCents){
+  let remaining = amountCents;
+  const result = [];
+  const available = {...cashDrawer};
+  DENOMINATIONS.forEach(d => {
+    if (remaining <= 0) return;
+    const use = Math.min(available[d.cents] || 0, Math.floor(remaining / d.cents));
+    if (use > 0){
+      result.push({cents:d.cents, label:d.label, count:use, shortage:false});
+      remaining -= use * d.cents;
+      available[d.cents] -= use;
+    }
+  });
+  if (remaining > 0){
+    DENOMINATIONS.forEach(d => {
+      if (remaining <= 0) return;
+      const use = Math.floor(remaining / d.cents);
+      if (use > 0){
+        result.push({cents:d.cents, label:d.label, count:use, shortage:true});
+        remaining -= use * d.cents;
+      }
+    });
+  }
+  return result;
+}
+
+// Nimmt an, dass der Kunde mit möglichst wenigen Scheinen/Münzen bezahlt hat (für den Kasseneingang).
+function breakdownAmount(amountCents){
+  let remaining = amountCents;
+  const result = [];
+  DENOMINATIONS.forEach(d => {
+    const use = Math.floor(remaining / d.cents);
+    if (use > 0){
+      result.push({cents:d.cents, label:d.label, count:use});
+      remaining -= use * d.cents;
+    }
+  });
+  return result;
+}
+
+function dbSaveDrawer(){
+  if (!dbReady) return;
+  try{
+    const tx = db.transaction('drawer', 'readwrite');
+    const store = tx.objectStore('drawer');
+    DENOMINATIONS.forEach(d => store.put({denom: d.cents, count: cashDrawer[d.cents] || 0}));
+  } catch(e){}
+}
+
 function openDatabase(){
   return new Promise((resolve) => {
     if (!window.indexedDB){ resolve(false); return; }
-    const req = indexedDB.open('markt24_db', 1);
+    const req = indexedDB.open('markt24_db', 2);
     req.onupgradeneeded = (e) => {
       const d = e.target.result;
       if (!d.objectStoreNames.contains('movements')){
@@ -1269,6 +1415,9 @@ function openDatabase(){
       }
       if (!d.objectStoreNames.contains('stock')){
         d.createObjectStore('stock', {keyPath:'productId'});
+      }
+      if (!d.objectStoreNames.contains('drawer')){
+        d.createObjectStore('drawer', {keyPath:'denom'});
       }
     };
     req.onsuccess = (e) => { db = e.target.result; dbReady = true; resolve(true); };
@@ -1297,15 +1446,18 @@ function loadDatabase(){
     if (!dbReady){ resolve(); return; }
     const stockMap = {};
     const movements = [];
-    const tx = db.transaction(['stock', 'movements'], 'readonly');
+    const drawerMap = {};
+    const tx = db.transaction(['stock', 'movements', 'drawer'], 'readonly');
     const stockReq = tx.objectStore('stock').getAll();
     const movReq = tx.objectStore('movements').getAll();
+    const drawerReq = tx.objectStore('drawer').getAll();
     tx.oncomplete = () => {
       (stockReq.result || []).forEach(r => stockMap[r.productId] = r.qty);
       movements.push(...(movReq.result || []));
-      resolve({stockMap, movements});
+      (drawerReq.result || []).forEach(r => drawerMap[r.denom] = r.count);
+      resolve({stockMap, movements, drawerMap});
     };
-    tx.onerror = () => resolve({stockMap:{}, movements:[]});
+    tx.onerror = () => resolve({stockMap:{}, movements:[], drawerMap:{}});
   });
 }
 
@@ -1682,11 +1834,13 @@ function renderSummary(){
   totalDisplay.classList.add('flash');
 
   const payBtn = document.getElementById('payBtn');
+  const breakdownEl = document.getElementById('changeBreakdown');
 
   if (paymentMethod === 'karte'){
     document.getElementById('givenRow').style.display = 'none';
     document.getElementById('quickCash').style.display = 'none';
     document.getElementById('changeRow').style.display = 'none';
+    breakdownEl.innerHTML = '';
     payBtn.disabled = !(brutto > 0);
   } else {
     document.getElementById('givenRow').style.display = 'flex';
@@ -1697,6 +1851,15 @@ function renderSummary(){
     changeEl.textContent = fmt(Math.abs(change));
     changeEl.classList.toggle('neg', change < 0);
     payBtn.disabled = !(brutto > 0 && given >= brutto);
+
+    if (change > 0.001){
+      const parts = breakdownChange(Math.round(change * 100));
+      breakdownEl.innerHTML = 'Rückgeld ausgeben: ' + parts.map(p =>
+        `<span class="cb-chip${p.shortage ? ' shortage' : ''}">${p.count}× ${p.label}</span>`
+      ).join('');
+    } else {
+      breakdownEl.innerHTML = '';
+    }
   }
 }
 
@@ -1775,6 +1938,12 @@ function buildReceiptHtml(tx){
       <div class="receipt-line"><span>Gegeben</span><span>${fmt(tx.given)}</span></div>
       <div class="receipt-line"><span>Rückgeld</span><span>${fmt(tx.change)}</span></div>
     `;
+    if (tx.changeBreakdown && tx.changeBreakdown.length > 0){
+      html += `<hr><div class="receipt-line"><span style="font-weight:700;">Rückgeld ausgeben:</span><span></span></div>`;
+      tx.changeBreakdown.forEach(p => {
+        html += `<div class="receipt-line"><span class="rname">${p.count}× ${p.label}${p.shortage ? ' (Bestand knapp!)' : ''}</span></div>`;
+      });
+    }
   }
   html += `<div class="rfoot">Danke für Ihren Einkauf!<br>MARKT/24 · Kundenservice: 0800 / 24 24 24</div>`;
   return html;
@@ -1786,6 +1955,22 @@ document.getElementById('payBtn').addEventListener('click', () => {
   const change = paymentMethod === 'bar' ? (given - brutto) : 0;
   const now = new Date();
   txCounter += 1;
+
+  let changeBreakdown = [];
+  if (paymentMethod === 'bar'){
+    const changeCents = Math.round(change * 100);
+    const givenCents = Math.round(given * 100);
+    // Rückgeld aus dem Kassenbestand entnehmen
+    changeBreakdown = breakdownChange(changeCents);
+    changeBreakdown.forEach(b => {
+      cashDrawer[b.cents] = Math.max(0, (cashDrawer[b.cents] || 0) - b.count);
+    });
+    // Erhaltenes Bargeld (angenommen in möglichst wenigen Scheinen/Münzen) in die Kasse legen
+    breakdownAmount(givenCents).forEach(b => {
+      cashDrawer[b.cents] = (cashDrawer[b.cents] || 0) + b.count;
+    });
+    dbSaveDrawer();
+  }
 
   const tx = {
     id: txCounter,
@@ -1799,6 +1984,7 @@ document.getElementById('payBtn').addEventListener('click', () => {
     discountPercent, method: paymentMethod,
     given: paymentMethod === 'bar' ? given : brutto,
     change,
+    changeBreakdown,
     voided: false
   };
   transactions.push(tx);
@@ -1984,6 +2170,50 @@ document.getElementById('lagerLowToggle').addEventListener('click', () => {
   renderLagerCards();
 });
 
+// ---- Kassenbestand-Panel ----
+function renderCashPanel(){
+  const totalCents = drawerTotalCents();
+  const totalPieces = DENOMINATIONS.reduce((s,d) => s + (cashDrawer[d.cents] || 0), 0);
+  document.getElementById('cashStats').innerHTML = `
+    <div class="lager-stat good">
+      <div class="lsnum">${fmt(totalCents/100)}</div>
+      <div class="lslabel">Gesamtbestand</div>
+    </div>
+    <div class="lager-stat">
+      <div class="lsnum">${totalPieces}</div>
+      <div class="lslabel">Scheine/Münzen</div>
+    </div>
+  `;
+  const wrap = document.getElementById('cashTable');
+  wrap.innerHTML = '';
+  DENOMINATIONS.forEach(d => {
+    const count = cashDrawer[d.cents] || 0;
+    const row = document.createElement('div');
+    row.className = 'cash-row' + (count === 0 ? ' empty' : '');
+    row.innerHTML = `
+      <div class="cdenom">${d.label}</div>
+      <div class="ccount">${count} Stk.</div>
+      <div class="csub">${fmt((d.cents * count) / 100)}</div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+document.getElementById('cashBtn').addEventListener('click', () => {
+  renderCashPanel();
+  document.getElementById('cashOverlay').classList.add('show');
+});
+document.getElementById('cashCloseBtn').addEventListener('click', () => {
+  document.getElementById('cashOverlay').classList.remove('show');
+});
+document.getElementById('cashResetBtn').addEventListener('click', () => {
+  cashDrawer = initialDrawerFill();
+  dbSaveDrawer();
+  playDrawerSound();
+  showToast('Kassenbestand auf 250,00 € zurückgesetzt.');
+  renderCashPanel();
+});
+
 // ---- Alterssperre ----
 document.getElementById('ageYesBtn').addEventListener('click', () => {
   document.getElementById('ageOverlay').classList.remove('show');
@@ -2031,6 +2261,16 @@ function renderBonsTable(){
     if (voidBtn){
       voidBtn.onclick = () => {
         tx.items.forEach(it => { adjustStock(it.id, it.qty, 'Bon #' + tx.id + ' storniert'); });
+        if (tx.method === 'bar'){
+          // Kassenbestand zurückdrehen: Rückgeld war raus, Gegeben-Betrag kommt wieder raus (an Kunden zurück)
+          if (tx.changeBreakdown){
+            tx.changeBreakdown.forEach(b => { cashDrawer[b.cents] = (cashDrawer[b.cents] || 0) + b.count; });
+          }
+          breakdownAmount(Math.round(tx.given * 100)).forEach(b => {
+            cashDrawer[b.cents] = Math.max(0, (cashDrawer[b.cents] || 0) - b.count);
+          });
+          dbSaveDrawer();
+        }
         tx.voided = true;
         playStornoSound();
         showToast(`Bon #${tx.id} storniert — Ware wieder eingebucht.`);
@@ -2144,17 +2384,28 @@ function showToast(msg){
 async function initApp(){
   await openDatabase();
   if (dbReady){
-    const {stockMap, movements} = await loadDatabase();
+    const {stockMap, movements, drawerMap} = await loadDatabase();
     const hasSavedStock = stockMap && Object.keys(stockMap).length > 0;
     if (hasSavedStock){
       PRODUCTS.forEach(p => {
         stock[p.id] = stockMap[p.id] !== undefined ? stockMap[p.id] : 30;
       });
       movementLog = movements || [];
-      showToast('Lagerbestand aus der Datenbank geladen.');
     } else {
       // Erster Start: Ausgangsbestand einmalig in der DB anlegen
       PRODUCTS.forEach(p => dbSaveStock(p.id, stock[p.id]));
+    }
+    const hasSavedDrawer = drawerMap && Object.keys(drawerMap).length > 0;
+    if (hasSavedDrawer){
+      DENOMINATIONS.forEach(d => {
+        cashDrawer[d.cents] = drawerMap[d.cents] !== undefined ? drawerMap[d.cents] : 0;
+      });
+    } else {
+      // Erster Start: Kassenbestand von 250,00 € in die Datenbank schreiben
+      dbSaveDrawer();
+    }
+    if (hasSavedStock || hasSavedDrawer){
+      showToast('Bestand & Kassenbestand aus der Datenbank geladen.');
     }
   }
   renderAll();
