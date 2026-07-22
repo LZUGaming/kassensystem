@@ -99,6 +99,20 @@ html,body{
   font-family:'Inter',sans-serif;
 }
 .lager-btn:hover{ border-color: var(--teal); }
+.cash-total{
+  padding:4px 11px;
+  border:1px solid var(--amber-dim);
+  background: rgba(255,176,32,0.08);
+  border-radius: 4px;
+  font-size:12.5px;
+  font-weight:700;
+  font-family:'Space Grotesk',sans-serif;
+  color: var(--amber);
+  letter-spacing:.3px;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.cash-total:hover{ border-color: var(--amber); }
 .menu-wrap{ position:relative; }
 .menu-dropdown{
   position:absolute;
@@ -1166,6 +1180,7 @@ html,body{
           <button id="lagerBtn">📦 Lagerverwaltung</button>
         </div>
       </div>
+      <div class="cash-total" id="cashTotalDisplay" title="Aktueller Kassenbestand">💶 0,00 €</div>
       <div class="kasse-id" id="itemCount">0 Artikel</div>
       <div class="clock" id="clock">--:--:--</div>
     </div>
@@ -1863,10 +1878,15 @@ function renderSummary(){
   }
 }
 
+function updateCashTotalDisplay(){
+  document.getElementById('cashTotalDisplay').textContent = '💶 ' + fmt(drawerTotalCents() / 100);
+}
+
 function renderAll(){
   renderGrid();
   renderCart();
   renderSummary();
+  updateCashTotalDisplay();
 }
 
 // ---- search / scan ----
@@ -1970,6 +1990,7 @@ document.getElementById('payBtn').addEventListener('click', () => {
       cashDrawer[b.cents] = (cashDrawer[b.cents] || 0) + b.count;
     });
     dbSaveDrawer();
+    updateCashTotalDisplay();
   }
 
   const tx = {
@@ -2199,10 +2220,12 @@ function renderCashPanel(){
   });
 }
 
-document.getElementById('cashBtn').addEventListener('click', () => {
+function openCashPanel(){
   renderCashPanel();
   document.getElementById('cashOverlay').classList.add('show');
-});
+}
+document.getElementById('cashBtn').addEventListener('click', openCashPanel);
+document.getElementById('cashTotalDisplay').addEventListener('click', openCashPanel);
 document.getElementById('cashCloseBtn').addEventListener('click', () => {
   document.getElementById('cashOverlay').classList.remove('show');
 });
@@ -2212,6 +2235,7 @@ document.getElementById('cashResetBtn').addEventListener('click', () => {
   playDrawerSound();
   showToast('Kassenbestand auf 250,00 € zurückgesetzt.');
   renderCashPanel();
+  updateCashTotalDisplay();
 });
 
 // ---- Alterssperre ----
@@ -2270,6 +2294,7 @@ function renderBonsTable(){
             cashDrawer[b.cents] = Math.max(0, (cashDrawer[b.cents] || 0) - b.count);
           });
           dbSaveDrawer();
+          updateCashTotalDisplay();
         }
         tx.voided = true;
         playStornoSound();
