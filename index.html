@@ -871,6 +871,102 @@ html,body{
   font-size:13px;
 }
 .lager-head button:hover{ color: var(--text); border-color: var(--red); }
+.lager-head-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.new-product-btn{
+  width:auto !important;
+  height:auto !important;
+  background: rgba(63,214,192,0.12) !important;
+  border:1px solid var(--teal) !important;
+  color: var(--teal) !important;
+  padding: 7px 13px !important;
+  border-radius:7px !important;
+  font-size:12px !important;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.new-product-btn:hover{ filter:brightness(1.15); color: var(--teal) !important; border-color: var(--teal) !important; }
+
+.newprod-panel{
+  width: 460px;
+  max-width: 90vw;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius: 14px;
+  overflow:hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  animation: dropIn .25s cubic-bezier(.2,.9,.25,1);
+}
+.newprod-body{
+  padding: 16px 18px 18px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.newprod-body label{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  font-size:11.5px;
+  color: var(--muted);
+  font-weight:600;
+}
+.newprod-body input, .newprod-body select{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 9px 10px;
+  color: var(--text);
+  font-size:13px;
+  outline:none;
+  font-family:'Inter',sans-serif;
+}
+.newprod-body input:focus, .newprod-body select:focus{ border-color: var(--teal); }
+.newprod-row2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+.newprod-checkbox{
+  flex-direction:row !important;
+  align-items:center;
+  gap:8px !important;
+  justify-content:flex-start;
+  padding-top:18px;
+}
+.newprod-checkbox input{
+  width:16px; height:16px;
+  flex-shrink:0;
+  accent-color: var(--red);
+}
+.newprod-preview{
+  font-size:11.5px;
+  color: var(--muted);
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 9px 11px;
+}
+.newprod-preview strong{
+  color: var(--amber);
+  font-family:'Space Grotesk',sans-serif;
+}
+.newprod-submit{
+  background: var(--teal);
+  color:#06201c;
+  border:none;
+  border-radius:10px;
+  padding: 11px 0;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;
+}
+.newprod-submit:hover{ filter:brightness(1.1); }
 
 .lager-table-wrap{
   overflow-y:auto;
@@ -1454,7 +1550,10 @@ html,body{
   <div class="lager-panel lager-panel-xl">
     <div class="lager-head">
       <h2>📦 Lagerverwaltung</h2>
-      <button id="lagerCloseBtn">✕</button>
+      <div class="lager-head-actions">
+        <button class="new-product-btn" id="newProductBtn">+ Neues Produkt</button>
+        <button id="lagerCloseBtn">✕</button>
+      </div>
     </div>
     <div class="lager-stats" id="lagerStats"></div>
     <div class="lager-searchrow">
@@ -1463,6 +1562,42 @@ html,body{
     </div>
     <div class="lager-cat-chips" id="lagerCatChips"></div>
     <div class="lager-cards-wrap" id="lagerCards"></div>
+  </div>
+</div>
+
+<div class="overlay" id="newProductOverlay">
+  <div class="newprod-panel">
+    <div class="lager-head">
+      <h2>+ Neues Produkt anlegen</h2>
+      <button id="newProductCloseBtn">✕</button>
+    </div>
+    <div class="newprod-body">
+      <label>Warengruppe
+        <select id="npCategory"></select>
+      </label>
+      <label>Produktname
+        <input id="npName" type="text" placeholder="z. B. Cola Mix" autocomplete="off">
+      </label>
+      <div class="newprod-row2">
+        <label>Preis pro Stück (€)
+          <input id="npPrice" type="text" inputmode="decimal" placeholder="z. B. 1,15">
+        </label>
+        <label>Gebinde-/Verpackungsgröße
+          <input id="npPack" type="number" min="1" value="1">
+        </label>
+      </div>
+      <div class="newprod-row2">
+        <label>Anfangsbestand (Stk.)
+          <input id="npStock" type="number" min="0" value="30">
+        </label>
+        <label class="newprod-checkbox">
+          <input id="npAlcohol" type="checkbox">
+          Alkoholisch (18+ Alterssperre)
+        </label>
+      </div>
+      <div class="newprod-preview" id="npPreview">Nächste freie Artikelnummer in dieser Warengruppe: <strong id="npNextId">–</strong></div>
+      <button class="newprod-submit" id="npSubmitBtn">Produkt anlegen</button>
+    </div>
   </div>
 </div>
 
@@ -2496,6 +2631,96 @@ document.getElementById('lagerLowToggle').addEventListener('click', () => {
   lagerLowOnly = !lagerLowOnly;
   document.getElementById('lagerLowToggle').classList.toggle('active', lagerLowOnly);
   renderLagerCards();
+});
+
+// ---- Neues Produkt anlegen: automatische Artikelnummer je Warengruppe ----
+// Jede Warengruppe hat einen eigenen Nummernkreis (siehe Original-Tabelle):
+// Getränk 1000er, Obst/Gemüse 2000er, Backwaren 3000er, Wurst/Fleischwaren 4000er,
+// Süßwaren 5000er, Molkerreierzeugnisse 6000er.
+const CATEGORY_PREFIX = {
+  "Getränk": 1000,
+  "Obst/Gemüse": 2000,
+  "Backwaren": 3000,
+  "Wurst/Fleischwaren": 4000,
+  "Süßwaren": 5000,
+  "Molkerreierzeugnisse": 6000
+};
+
+function nextArticleNumber(category){
+  const base = CATEGORY_PREFIX[category] || 9000;
+  const existing = PRODUCTS
+    .filter(p => p.category === category)
+    .map(p => parseInt(p.id, 10))
+    .filter(n => !isNaN(n));
+  const highest = existing.length > 0 ? Math.max(...existing) : base;
+  return String(Math.max(highest + 1, base + 1));
+}
+
+const npCategorySelect = document.getElementById('npCategory');
+categories.filter(c => c !== 'Alle').forEach(cat => {
+  const opt = document.createElement('option');
+  opt.value = cat;
+  opt.textContent = cat;
+  npCategorySelect.appendChild(opt);
+});
+
+function updateNpPreview(){
+  const cat = npCategorySelect.value;
+  document.getElementById('npNextId').textContent = nextArticleNumber(cat);
+}
+npCategorySelect.addEventListener('change', updateNpPreview);
+
+function resetNewProductForm(){
+  document.getElementById('npName').value = '';
+  document.getElementById('npPrice').value = '';
+  document.getElementById('npPack').value = '1';
+  document.getElementById('npStock').value = '30';
+  document.getElementById('npAlcohol').checked = false;
+  npCategorySelect.selectedIndex = 0;
+  updateNpPreview();
+}
+
+document.getElementById('newProductBtn').addEventListener('click', () => {
+  resetNewProductForm();
+  document.getElementById('newProductOverlay').classList.add('show');
+});
+document.getElementById('newProductCloseBtn').addEventListener('click', () => {
+  document.getElementById('newProductOverlay').classList.remove('show');
+});
+
+document.getElementById('npSubmitBtn').addEventListener('click', () => {
+  const name = document.getElementById('npName').value.trim();
+  const category = npCategorySelect.value;
+  const priceRaw = document.getElementById('npPrice').value.replace(',', '.').trim();
+  const price = parseFloat(priceRaw);
+  const pack = parseInt(document.getElementById('npPack').value, 10) || 1;
+  const initialStock = Math.max(0, parseInt(document.getElementById('npStock').value, 10) || 0);
+  const isAlcohol = document.getElementById('npAlcohol').checked;
+
+  if (!name){
+    playErrorSound();
+    showToast('Bitte einen Produktnamen eingeben.');
+    return;
+  }
+  if (!priceRaw || isNaN(price) || price <= 0){
+    playErrorSound();
+    showToast('Bitte einen gültigen Preis eingeben.');
+    return;
+  }
+
+  const newId = nextArticleNumber(category);
+  const newProduct = {id: newId, name, category, price: Math.round(price * 100) / 100, pack: String(pack)};
+  PRODUCTS.push(newProduct);
+  stock[newId] = 0;
+  adjustStock(newId, initialStock, 'Neuanlage Artikel (Lager)');
+  if (isAlcohol) ALCOHOL_IDS.add(newId);
+
+  document.getElementById('newProductOverlay').classList.remove('show');
+  playScanSound();
+  showToast(`"${name}" angelegt als Artikel Nr. ${newId} (${category}).`);
+  renderGrid();
+  renderLagerCatChips();
+  renderLagerCards(newId, 'added');
 });
 
 // ---- Kassenbestand-Panel ----
