@@ -926,6 +926,55 @@ html,body{
   font-family:'Inter',sans-serif;
 }
 .newprod-body input:focus, .newprod-body select:focus{ border-color: var(--teal); }
+.npcat-row{
+  display:flex;
+  gap:8px;
+}
+.npcat-row select{ flex:1; }
+.npcat-add-btn{
+  flex-shrink:0;
+  background: rgba(63,214,192,0.12) !important;
+  border:1px solid var(--teal) !important;
+  color: var(--teal) !important;
+  padding: 0 12px !important;
+  border-radius:8px !important;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.npcat-add-btn:hover{ filter:brightness(1.15); }
+.npcat-newrow{
+  display:none;
+  gap:8px;
+  margin-top:-4px;
+}
+.npcat-newrow.show{ display:flex; }
+.npcat-newrow input{
+  flex:1;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size:12.5px;
+  outline:none;
+}
+.npcat-newrow input:focus{ border-color: var(--teal); }
+.npcat-newrow button{
+  flex-shrink:0;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 0 12px;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  background: var(--panel-2);
+  color: var(--text);
+}
+.npcat-newrow #npNewCatConfirm{ border-color: var(--teal); color: var(--teal); }
+.npcat-newrow #npNewCatCancel{ border-color: var(--line); color: var(--muted); }
+.npcat-newrow button:hover{ filter:brightness(1.2); }
 .newprod-row2{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -1083,6 +1132,17 @@ html,body{
   gap:10px;
   margin-bottom:8px;
 }
+.lager-delete-btn{
+  flex-shrink:0;
+  width:30px; height:30px;
+  border-radius:8px;
+  background: var(--panel);
+  border:1px solid var(--line);
+  color: var(--muted);
+  font-size:13px;
+  cursor:pointer;
+}
+.lager-delete-btn:hover{ border-color: var(--red); color: var(--red); }
 .lager-avatar{
   width:34px; height:34px;
   border-radius:9px;
@@ -1254,6 +1314,18 @@ html,body{
   background: var(--green);
   color:#06210f;
 }
+.age-yes-danger{
+  background: var(--red);
+  color:#2a0603;
+  padding:11px 0;
+  border-radius:9px;
+  border:none;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+}
+.age-yes-danger:hover{ filter:brightness(1.1); }
 .age-yes:hover{ filter:brightness(1.1); }
 .age-no{
   background: var(--panel-2);
@@ -1573,8 +1645,16 @@ html,body{
     </div>
     <div class="newprod-body">
       <label>Warengruppe
-        <select id="npCategory"></select>
+        <div class="npcat-row">
+          <select id="npCategory"></select>
+          <button type="button" id="npNewCatBtn" class="npcat-add-btn no-key-sound">+ Neu</button>
+        </div>
       </label>
+      <div class="npcat-newrow" id="npNewCatRow">
+        <input id="npNewCatName" type="text" placeholder="Name der neuen Warengruppe" autocomplete="off">
+        <button id="npNewCatConfirm" class="no-key-sound">Anlegen</button>
+        <button id="npNewCatCancel" class="no-key-sound">Abbrechen</button>
+      </div>
       <label>Produktname
         <input id="npName" type="text" placeholder="z. B. Cola Mix" autocomplete="off">
       </label>
@@ -1597,6 +1677,18 @@ html,body{
       </div>
       <div class="newprod-preview" id="npPreview">Nächste freie Artikelnummer in dieser Warengruppe: <strong id="npNextId">–</strong></div>
       <button class="newprod-submit" id="npSubmitBtn">Produkt anlegen</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="deleteProductOverlay">
+  <div class="age-panel">
+    <div class="age-icon">🗑</div>
+    <h2>Artikel löschen</h2>
+    <p id="deleteProductText">Artikel wirklich aus dem Sortiment entfernen?</p>
+    <div class="age-actions">
+      <button class="age-no no-key-sound" id="deleteProductNoBtn">Abbrechen</button>
+      <button class="age-yes-danger no-key-sound" id="deleteProductYesBtn">Ja, endgültig löschen</button>
     </div>
   </div>
 </div>
@@ -1959,19 +2051,23 @@ setInterval(tickClock, 1000);
 // ---- sidebar categories ----
 const categories = ["Alle", ...Array.from(new Set(PRODUCTS.map(p => p.category)))];
 const sidebar = document.getElementById('sidebar');
-categories.forEach(cat => {
-  const btn = document.createElement('button');
-  btn.className = 'cat-btn' + (cat === activeCategory ? ' active' : '');
-  btn.dataset.cat = cat;
-  btn.innerHTML = `<div class="icon">${cat === "Alle" ? "▦" : (CAT_ICONS[cat] || "•")}</div><div>${cat === "Alle" ? "Alle" : cat.split('/')[0]}</div>`;
-  btn.onclick = () => {
-    activeCategory = cat;
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
-    document.getElementById('catTitle').textContent = cat === "Alle" ? "Alle Warengruppen" : cat;
-    renderGrid();
-  };
-  sidebar.appendChild(btn);
-});
+function renderSidebarCategories(){
+  sidebar.innerHTML = '';
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === activeCategory ? ' active' : '');
+    btn.dataset.cat = cat;
+    btn.innerHTML = `<div class="icon">${cat === "Alle" ? "▦" : (CAT_ICONS[cat] || "•")}</div><div>${cat === "Alle" ? "Alle" : cat.split('/')[0]}</div>`;
+    btn.onclick = () => {
+      activeCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+      document.getElementById('catTitle').textContent = cat === "Alle" ? "Alle Warengruppen" : cat;
+      renderGrid();
+    };
+    sidebar.appendChild(btn);
+  });
+}
+renderSidebarCategories();
 
 // ---- Geld-Eingabe per Stückelung: Tippen addiert zum "Gegeben"-Betrag ----
 const qc = document.getElementById('quickCash');
@@ -2511,6 +2607,45 @@ function renderLagerCatChips(){
   });
 }
 
+// ---- Artikel aus dem Sortiment löschen ----
+let pendingDeleteId = null;
+function requestDeleteProduct(id){
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  if (cart[id]){
+    playErrorSound();
+    showToast(`„${p.name}“ ist noch im Warenkorb — bitte dort zuerst entfernen.`);
+    return;
+  }
+  pendingDeleteId = id;
+  document.getElementById('deleteProductText').textContent =
+    `„${p.name}“ (Nr. ${p.id}) wirklich endgültig aus dem Sortiment entfernen? Der aktuelle Lagerbestand (${stock[id]} Stk.) geht dabei verloren.`;
+  document.getElementById('deleteProductOverlay').classList.add('show');
+}
+document.getElementById('deleteProductYesBtn').addEventListener('click', () => {
+  const id = pendingDeleteId;
+  pendingDeleteId = null;
+  document.getElementById('deleteProductOverlay').classList.remove('show');
+  if (!id) return;
+  const idx = PRODUCTS.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  const removed = PRODUCTS[idx];
+  PRODUCTS.splice(idx, 1);
+  delete stock[id];
+  ALCOHOL_IDS.delete(id);
+  if (dbReady){
+    try{ db.transaction('stock', 'readwrite').objectStore('stock').delete(id); } catch(e){}
+  }
+  playStornoSound();
+  showToast(`„${removed.name}“ wurde aus dem Sortiment entfernt.`);
+  renderGrid();
+  renderLagerCards();
+});
+document.getElementById('deleteProductNoBtn').addEventListener('click', () => {
+  pendingDeleteId = null;
+  document.getElementById('deleteProductOverlay').classList.remove('show');
+});
+
 function renderLagerCards(flashId, flashType){
   const wrap = document.getElementById('lagerCards');
   wrap.innerHTML = '';
@@ -2552,6 +2687,7 @@ function renderLagerCards(flashId, flashType){
           <div class="lstock ${low ? 'low' : 'ok'}">${bestand}</div>
           <div class="lmelde">Meldebestand ${MELDEBESTAND}</div>
         </div>
+        <button class="lager-delete-btn no-key-sound" title="Artikel aus dem Sortiment löschen">🗑</button>
       </div>
       <div class="lager-bar-track"><div class="lager-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
       <div class="lager-actions-row">
@@ -2601,6 +2737,7 @@ function renderLagerCards(flashId, flashType){
     card.querySelector('.lz-in').onclick = doEinbuchen;
     card.querySelector('.lz-out').onclick = doAusbuchen;
     qtyInput.addEventListener('keydown', e => { if (e.key === 'Enter') doEinbuchen(); });
+    card.querySelector('.lager-delete-btn').onclick = () => requestDeleteProduct(p.id);
 
     if (flashId === p.id){
       card.classList.add(flashType === 'removed' ? 'just-removed' : 'just-added');
@@ -2657,12 +2794,18 @@ function nextArticleNumber(category){
 }
 
 const npCategorySelect = document.getElementById('npCategory');
-categories.filter(c => c !== 'Alle').forEach(cat => {
-  const opt = document.createElement('option');
-  opt.value = cat;
-  opt.textContent = cat;
-  npCategorySelect.appendChild(opt);
-});
+function renderNpCategoryOptions(selectValue){
+  const prev = selectValue || npCategorySelect.value;
+  npCategorySelect.innerHTML = '';
+  categories.filter(c => c !== 'Alle').forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    npCategorySelect.appendChild(opt);
+  });
+  if (categories.includes(prev)) npCategorySelect.value = prev;
+}
+renderNpCategoryOptions();
 
 function updateNpPreview(){
   const cat = npCategorySelect.value;
@@ -2670,12 +2813,50 @@ function updateNpPreview(){
 }
 npCategorySelect.addEventListener('change', updateNpPreview);
 
+function closeNpNewCatRow(){
+  document.getElementById('npNewCatRow').classList.remove('show');
+  document.getElementById('npNewCatName').value = '';
+}
+
+document.getElementById('npNewCatBtn').addEventListener('click', () => {
+  document.getElementById('npNewCatRow').classList.add('show');
+  document.getElementById('npNewCatName').focus();
+});
+document.getElementById('npNewCatCancel').addEventListener('click', closeNpNewCatRow);
+document.getElementById('npNewCatConfirm').addEventListener('click', () => {
+  const name = document.getElementById('npNewCatName').value.trim();
+  if (!name){
+    playErrorSound();
+    showToast('Bitte einen Namen für die neue Warengruppe eingeben.');
+    return;
+  }
+  if (categories.some(c => c.toLowerCase() === name.toLowerCase())){
+    playErrorSound();
+    showToast('Diese Warengruppe gibt es schon.');
+    return;
+  }
+  const maxPrefix = Math.max(...Object.values(CATEGORY_PREFIX));
+  const newPrefix = maxPrefix + 1000;
+  CATEGORY_PREFIX[name] = newPrefix;
+  CAT_ICONS[name] = '🏷';
+  categories.push(name);
+  closeNpNewCatRow();
+  renderSidebarCategories();
+  renderNpCategoryOptions(name);
+  npCategorySelect.value = name;
+  updateNpPreview();
+  playScanSound();
+  showToast(`Warengruppe "${name}" angelegt — Artikelnummern ab ${newPrefix + 1}.`);
+});
+
 function resetNewProductForm(){
   document.getElementById('npName').value = '';
   document.getElementById('npPrice').value = '';
   document.getElementById('npPack').value = '1';
   document.getElementById('npStock').value = '30';
   document.getElementById('npAlcohol').checked = false;
+  closeNpNewCatRow();
+  renderNpCategoryOptions();
   npCategorySelect.selectedIndex = 0;
   updateNpPreview();
 }
@@ -2687,6 +2868,20 @@ document.getElementById('newProductBtn').addEventListener('click', () => {
 document.getElementById('newProductCloseBtn').addEventListener('click', () => {
   document.getElementById('newProductOverlay').classList.remove('show');
 });
+
+// Fügt ein neues Produkt direkt hinter dem letzten Produkt seiner Warengruppe ein,
+// statt es einfach ans Ende der Liste zu hängen — so erscheint es auf der Startseite
+// zusammen mit den anderen Artikeln seiner Abteilung, nicht isoliert ganz unten.
+function insertProductInCategory(product){
+  let insertAt = PRODUCTS.length;
+  for (let i = PRODUCTS.length - 1; i >= 0; i--){
+    if (PRODUCTS[i].category === product.category){
+      insertAt = i + 1;
+      break;
+    }
+  }
+  PRODUCTS.splice(insertAt, 0, product);
+}
 
 document.getElementById('npSubmitBtn').addEventListener('click', () => {
   const name = document.getElementById('npName').value.trim();
@@ -2710,7 +2905,7 @@ document.getElementById('npSubmitBtn').addEventListener('click', () => {
 
   const newId = nextArticleNumber(category);
   const newProduct = {id: newId, name, category, price: Math.round(price * 100) / 100, pack: String(pack)};
-  PRODUCTS.push(newProduct);
+  insertProductInCategory(newProduct);
   stock[newId] = 0;
   adjustStock(newId, initialStock, 'Neuanlage Artikel (Lager)');
   if (isAlcohol) ALCOHOL_IDS.add(newId);
