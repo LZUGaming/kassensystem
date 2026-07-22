@@ -1,14 +1,18 @@
 # MARKT/24 Kassensystem
 
-Ein browserbasiertes Kassenterminal (POS) für einen Supermarkt/Kiosk — läuft komplett client-seitig, kein Server nötig.
+Ein browserbasiertes Kassenterminal (POS) zum Üben/Spielen — läuft komplett client-seitig, kein Server nötig.
 
 **Features:**
 - 87 Artikel aus 6 Warengruppen (Getränke, Obst/Gemüse, Backwaren, Wurst/Fleisch, Süßwaren, Molkereiprodukte)
-- Warenkorb mit Netto/MwSt/Brutto-Berechnung, Gegeben/Rückgeld
+- Warenkorb mit Netto/MwSt/Brutto-Berechnung, Bar/Karte, Rabatt
 - Verkauf nur in ganzen Gebinden (Verpackungsgröße), Abrechnung pro Stück
 - Alterssperre (18+) für alkoholische Getränke
-- Lagerverwaltung mit Wareneingang (Bestand einbuchen)
-- Kassenbon nach Zahlungsabschluss
+- Lagerverwaltung mit Ein-/Ausbuchen (Wareneingang, Schwund, Beschädigt, Inventurkorrektur …)
+- Kassenbestand (250,00 € Startbestand, real gestückelt) mit animierter Kassenlade
+- Gegeben-Betrag per Schein-/Münz-Stückelung eintippen, live Rückgeld-Stückelung
+- Storno auf allen Ebenen (letzter Artikel, Posten, Warenkorb, abgeschlossener Bon)
+- Bons-Historie, Tagesabschluss/Z-Bericht, Ein-/Ausgänge-Protokoll
+- Kassengeräusche (Scan, Storno, Fehler, Kassenlade)
 
 ## Als GitHub Pages veröffentlichen
 
@@ -19,6 +23,14 @@ Ein browserbasiertes Kassenterminal (POS) für einen Supermarkt/Kiosk — läuft
 5. Nach ca. 1 Minute ist die Seite live unter:
    `https://<dein-github-name>.github.io/<repo-name>/`
 
-## Hinweis
+## Wichtiger Hinweis: reines Übungssystem
 
-Lagerbestände und Warenkorb leben nur im Arbeitsspeicher des Browsers — ein Neuladen der Seite setzt sie auf den Ausgangswert zurück.
+Das ist bewusst ein **Spiel-/Trainingssystem, kein Kassenbuch für echten Geschäftsbetrieb**. Die Datenbank
+(IndexedDB im Browser) wird bei **jedem Laden der Seite komplett geleert und neu auf Standardwerte gesetzt**:
+
+- Jeder Artikel wieder auf 30 Stk. Lagerbestand
+- Kassenbestand wieder auf 250,00 € (in Standard-Stückelung)
+- Bons, Ein-/Ausgänge-Protokoll und Tagesabschluss leer
+
+Innerhalb einer Sitzung (ohne Neuladen) wird alles ganz normal live mitprotokolliert — nur beim nächsten
+Seitenaufruf beginnt wieder alles bei null.
