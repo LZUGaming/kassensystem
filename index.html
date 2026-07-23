@@ -67,6 +67,38 @@ html,body{
   font-weight:700;
 }
 .brand span{ color: var(--amber); }
+.employee-btn{
+  margin-left:8px;
+  padding:4px 11px;
+  border:1px solid var(--line);
+  background: var(--panel-2);
+  border-radius: 4px;
+  font-size:11.5px;
+  font-weight:600;
+  color: var(--muted);
+  cursor:pointer;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+}
+.employee-btn:hover{ border-color: var(--teal); color: var(--text); }
+.employee-btn.logged-in{
+  border-color: var(--teal);
+  color: var(--teal);
+  background: rgba(63,214,192,0.1);
+}
+.employee-input{
+  width:100%;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size:13px;
+  outline:none;
+  margin-bottom:16px;
+  text-align:center;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+}
+.employee-input:focus{ border-color: var(--teal); }
 .header-right{
   display:flex;
   align-items:center;
@@ -416,6 +448,19 @@ html,body{
 }
 .scan-input::placeholder{ color: var(--muted); font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; }
 .scan-input:focus{ border-color: var(--amber); }
+.manual-item-btn{
+  flex-shrink:0;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding: 0 16px;
+  color: var(--text);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+}
+.manual-item-btn:hover{ border-color: var(--teal); color: var(--teal); }
 
 .cat-title{
   font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
@@ -1552,10 +1597,47 @@ html,body{
   border-color: var(--teal);
   color: var(--teal);
 }
+.split-row{
+  padding: 10px 16px 0 16px;
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+}
+.split-row label{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:10.5px;
+  color: var(--muted);
+  font-weight:600;
+}
+.split-row input{
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 9px 10px;
+  color: var(--text);
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  font-size:13px;
+  outline:none;
+  text-align:right;
+}
+.split-row input:focus{ border-color: var(--amber); }
+.split-karte-info{
+  font-size:11px;
+  color: var(--muted);
+  padding-bottom:9px;
+  white-space:nowrap;
+}
+.split-karte-info strong{
+  color: var(--teal);
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+}
 
 .bons-row{
   display:grid;
-  grid-template-columns: 0.6fr 1fr 1fr 0.8fr 1fr;
+  grid-template-columns: 0.6fr 1fr 0.9fr 0.7fr 1.7fr;
   gap:8px;
   align-items:center;
   padding: 9px 8px;
@@ -1574,7 +1656,7 @@ html,body{
 }
 .bons-row .bstatus.paid{ background: rgba(89,214,124,0.14); color: var(--green); }
 .bons-row .bstatus.void{ background: rgba(255,107,94,0.14); color: var(--red); }
-.bons-row .bactions{ display:flex; gap:6px; }
+.bons-row .bactions{ display:flex; gap:6px; flex-wrap:wrap; }
 .bons-row .bactions button{
   background: var(--panel-2);
   border:1px solid var(--line);
@@ -1638,6 +1720,32 @@ html,body{
   cursor:pointer;
 }
 .we-row button:hover{ border-color: var(--teal); }
+
+.return-row{
+  display:grid;
+  grid-template-columns: 2fr 0.9fr 0.9fr 1fr;
+  gap:8px;
+  align-items:center;
+  padding: 9px 8px;
+  border-bottom:1px solid var(--line);
+  font-size:12.5px;
+}
+.return-row .rname{ font-weight:600; }
+.return-row .rmeta{ color: var(--muted); font-size:11px; }
+.return-row input[type="number"]{
+  width:100%;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:7px;
+  padding:7px 8px;
+  color: var(--text);
+  font-size:12.5px;
+  text-align:center;
+  outline:none;
+}
+.return-row input[type="number"]:focus{ border-color: var(--amber); }
+.return-row input[type="number"]:disabled{ opacity:.35; }
+.return-empty{ color: var(--muted); font-size:11.5px; }
 
 .move-row{
   display:grid;
@@ -1726,6 +1834,7 @@ html,body{
     <div class="brand">
       <div class="dot"></div>
       <h1>MARKT<span>/24</span> · KASSE 03</h1>
+      <button id="employeeBtn" class="employee-btn no-key-sound">👤 – nicht angemeldet –</button>
     </div>
     <div class="header-right">
       <div class="menu-wrap">
@@ -1757,6 +1866,7 @@ html,body{
         <input id="searchInput" type="text" placeholder="Artikel suchen…" autocomplete="off">
       </div>
       <input class="scan-input" id="scanInput" type="text" placeholder="Artikelnr. scannen + ⏎" autocomplete="off">
+      <button class="manual-item-btn" id="manualItemBtn">✏ Manuell</button>
     </div>
     <div class="cat-title" id="catTitle">Alle Warengruppen</div>
     <div class="grid" id="grid"></div>
@@ -1786,6 +1896,13 @@ html,body{
     <div class="pay-method" id="payMethod">
       <button class="pm-btn active" data-method="bar">💶 Bar</button>
       <button class="pm-btn" data-method="karte">💳 Karte</button>
+      <button class="pm-btn" data-method="split">🔀 Split</button>
+    </div>
+    <div class="split-row" id="splitRow" style="display:none;">
+      <label>Bar-Anteil (€)
+        <input id="splitBarInput" type="text" inputmode="decimal" placeholder="z. B. 10,00">
+      </label>
+      <div class="split-karte-info">Karten-Anteil: <strong id="splitKarteAmount">0,00 €</strong></div>
     </div>
     <div class="pay-area">
       <div class="pay-row" id="givenRow">
@@ -1806,6 +1923,67 @@ html,body{
 
 <div class="overlay" id="overlay">
   <div class="receipt" id="receiptBody"></div>
+</div>
+
+<div class="overlay" id="returnOverlay">
+  <div class="lager-panel">
+    <div class="lager-head">
+      <h2>↩ Teilrückgabe — Bon #<span id="returnBonId"></span></h2>
+      <button id="returnCloseBtn">✕</button>
+    </div>
+    <div class="lager-table-wrap">
+      <div id="returnItemsTable"></div>
+    </div>
+    <div class="we-action-row">
+      <button class="we-fill-btn" id="returnConfirmBtn">↩ Rückgabe durchführen</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="returnDocOverlay">
+  <div class="receipt" id="returnDocBody"></div>
+</div>
+
+<div class="overlay" id="manualItemOverlay">
+  <div class="newprod-panel">
+    <div class="lager-head">
+      <h2>✏ Manueller Artikel</h2>
+      <button id="manualItemCloseBtn">✕</button>
+    </div>
+    <div class="newprod-body">
+      <label>Bezeichnung
+        <input id="manualItemName" type="text" placeholder="z. B. Deko-Restposten" autocomplete="off">
+      </label>
+      <div class="newprod-row2">
+        <label>Preis pro Stück (€)
+          <input id="manualItemPrice" type="text" inputmode="decimal" placeholder="z. B. 4,50">
+        </label>
+        <label>Menge
+          <input id="manualItemQty" type="number" min="1" value="1">
+        </label>
+      </div>
+      <label>MwSt-Satz
+        <select id="manualItemMwst">
+          <option value="0.19">19% (Standard)</option>
+          <option value="0.07">7% (Lebensmittel)</option>
+        </select>
+      </label>
+      <button class="newprod-submit" id="manualItemSubmitBtn">Zum Warenkorb hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="employeeOverlay">
+  <div class="age-panel">
+    <div class="age-icon">👤</div>
+    <h2>Mitarbeiter-Anmeldung</h2>
+    <p>Name eintragen, damit Verkäufe dieser Person zugeordnet werden.</p>
+    <input id="employeeNameInput" type="text" placeholder="Name" autocomplete="off" class="employee-input">
+    <div class="age-actions">
+      <button class="age-no no-key-sound" id="employeeLogoutBtn">Abmelden</button>
+      <button class="age-yes no-key-sound" id="employeeConfirmBtn">Anmelden</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="welcomeOverlay">
@@ -2256,6 +2434,7 @@ let paymentMethod = 'bar'; // 'bar' | 'karte'
 let transactions = []; // abgeschlossene Verkäufe (für Bons-Historie & Tagesabschluss)
 let txCounter = 1000;
 const sessionStart = new Date();
+let currentEmployee = ''; // wer gerade an der Kasse angemeldet ist
 
 // MwSt nach Warengruppe statt einheitlich 19% — realistischer für einen Supermarkt:
 // In Deutschland sind die meisten Lebensmittel mit 7% besteuert, Getränke (auch alkoholfreie,
@@ -2266,7 +2445,9 @@ const CATEGORY_MWST = {
   "Backwaren": 0.07,
   "Wurst/Fleischwaren": 0.07,
   "Süßwaren": 0.07,
-  "Molkerreierzeugnisse": 0.07
+  "Molkerreierzeugnisse": 0.07,
+  "Sonstiges (19%)": 0.19,
+  "Sonstiges (7%)": 0.07
 };
 function getMwstRate(category){
   return CATEGORY_MWST[category] !== undefined ? CATEGORY_MWST[category] : 0.19;
@@ -2447,13 +2628,21 @@ discountOptions.forEach(pct => {
   dc.appendChild(b);
 });
 
-// ---- Zahlungsart Bar / Karte ----
+let splitBarAmount = 0;
+
+// ---- Zahlungsart Bar / Karte / Split ----
 document.querySelectorAll('.pm-btn').forEach(b => {
   b.addEventListener('click', () => {
     paymentMethod = b.dataset.method;
     document.querySelectorAll('.pm-btn').forEach(x => x.classList.toggle('active', x.dataset.method === paymentMethod));
+    document.getElementById('splitRow').style.display = paymentMethod === 'split' ? 'flex' : 'none';
     renderSummary();
   });
+});
+document.getElementById('splitBarInput').addEventListener('input', (e) => {
+  const raw = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+  splitBarAmount = parseFloat(raw) || 0;
+  renderSummary();
 });
 
 // ---- Verwaltungsmenü (Dropdown) ----
@@ -2538,7 +2727,7 @@ lizardBtn.addEventListener('click', () => {
 function renderGrid(){
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  let list = PRODUCTS.filter(p => activeCategory === "Alle" || p.category === activeCategory);
+  let list = PRODUCTS.filter(p => !p.isManual && (activeCategory === "Alle" || p.category === activeCategory));
   if (searchTerm.trim()){
     const t = searchTerm.toLowerCase();
     list = list.filter(p => p.name.toLowerCase().includes(t) || p.id.includes(t));
@@ -2774,11 +2963,24 @@ function renderSummary(){
     document.getElementById('givenRow').style.display = 'flex';
     document.getElementById('quickCash').style.display = 'flex';
     document.getElementById('changeRow').style.display = 'flex';
-    const change = given - brutto;
+
+    // Bei Split zählt nur der Bar-Anteil als "zu zahlender" Betrag für Gegeben/Rückgeld
+    const cashTarget = paymentMethod === 'split' ? splitBarAmount : brutto;
+    if (paymentMethod === 'split'){
+      const karteAnteil = Math.max(0, brutto - splitBarAmount);
+      document.getElementById('splitKarteAmount').textContent = fmt(karteAnteil);
+    }
+
+    const change = given - cashTarget;
     const changeEl = document.getElementById('changeVal');
     changeEl.textContent = fmt(Math.abs(change));
     changeEl.classList.toggle('neg', change < 0);
-    payBtn.disabled = !(brutto > 0 && given >= brutto);
+
+    if (paymentMethod === 'split'){
+      payBtn.disabled = !(brutto > 0 && splitBarAmount > 0 && splitBarAmount <= brutto + 0.001 && given >= cashTarget);
+    } else {
+      payBtn.disabled = !(brutto > 0 && given >= cashTarget);
+    }
 
     if (change > 0.001){
       const parts = breakdownChange(Math.round(change * 100));
@@ -2823,6 +3025,51 @@ document.getElementById('scanInput').addEventListener('keydown', e => {
   }
 });
 
+// ---- Manueller Artikel (ohne Nummer, freier Preis) ----
+let manualItemCounter = 1;
+document.getElementById('manualItemBtn').addEventListener('click', () => {
+  document.getElementById('manualItemName').value = '';
+  document.getElementById('manualItemPrice').value = '';
+  document.getElementById('manualItemQty').value = '1';
+  document.getElementById('manualItemMwst').selectedIndex = 0;
+  document.getElementById('manualItemOverlay').classList.add('show');
+  document.getElementById('manualItemName').focus();
+});
+document.getElementById('manualItemCloseBtn').addEventListener('click', () => {
+  document.getElementById('manualItemOverlay').classList.remove('show');
+});
+document.getElementById('manualItemSubmitBtn').addEventListener('click', () => {
+  const name = document.getElementById('manualItemName').value.trim();
+  const priceRaw = document.getElementById('manualItemPrice').value.replace(',', '.').trim();
+  const price = parseFloat(priceRaw);
+  const qty = Math.max(1, parseInt(document.getElementById('manualItemQty').value, 10) || 1);
+  const rate = parseFloat(document.getElementById('manualItemMwst').value);
+
+  if (!name){
+    playErrorSound();
+    showToast('Bitte eine Bezeichnung eingeben.');
+    return;
+  }
+  if (!priceRaw || isNaN(price) || price <= 0){
+    playErrorSound();
+    showToast('Bitte einen gültigen Preis eingeben.');
+    return;
+  }
+
+  const id = 'M' + (manualItemCounter++);
+  const category = rate === 0.19 ? 'Sonstiges (19%)' : 'Sonstiges (7%)';
+  const product = {id, name, category, price: Math.round(price * 100) / 100, pack: '1', isManual: true};
+  PRODUCTS.push(product);
+  stock[id] = 999999; // kein echter Bestand — nur damit bestehende Mengen-/Storno-Logik normal funktioniert
+
+  cart[id] = (cart[id] || 0) + qty;
+  cartOrder.push({id, units: qty});
+  document.getElementById('manualItemOverlay').classList.remove('show');
+  playScanSound();
+  showToast(`"${name}" (${qty}× ${fmt(price)}) zum Warenkorb hinzugefügt.`);
+  renderAll();
+});
+
 // ---- given amount ----
 document.getElementById('givenInput').addEventListener('input', e => {
   const raw = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
@@ -2849,11 +3096,12 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 function buildReceiptHtml(tx){
   let html = `
     <h2>MARKT/24</h2>
-    <div class="sub">Kasse 03 · Bon Nr. ${tx.id}${tx.voided ? ' · <strong style="color:#c0392b">STORNIERT</strong>' : ''}<br>${tx.date} ${tx.time}</div>
+    <div class="sub">Kasse 03 · Bon Nr. ${tx.id}${tx.voided ? ' · <strong style="color:#c0392b">STORNIERT</strong>' : ''}<br>${tx.date} ${tx.time}${tx.employee ? ' · Kassiert von: ' + tx.employee : ''}</div>
     <hr>
   `;
   tx.items.forEach(it => {
-    html += `<div class="receipt-line"><span class="rname">${it.qty}× ${it.name}</span><span>${fmt(it.price * it.qty)}</span></div>`;
+    const returned = (tx.itemsReturned && tx.itemsReturned[it.id]) || 0;
+    html += `<div class="receipt-line"><span class="rname">${it.qty}× ${it.name}${returned > 0 ? ` (${returned}× zurückgegeben)` : ''}</span><span>${fmt(it.price * it.qty)}</span></div>`;
   });
   html += `<hr>`;
   if (tx.discountAmount > 0){
@@ -2866,12 +3114,19 @@ function buildReceiptHtml(tx){
   (tx.mwstBreakdown || []).forEach(b => {
     html += `<div class="receipt-line"><span>MwSt ${(b.rate * 100).toFixed(0)}%</span><span>${fmt(b.mwst)}</span></div>`;
   });
+  const methodLabel = tx.method === 'karte' ? 'Karte' : (tx.method === 'split' ? 'Split (Bar + Karte)' : 'Bar');
   html += `
     <div class="rtotal"><span>Bruttobetrag</span><span>${fmt(tx.brutto)}</span></div>
     <hr>
-    <div class="receipt-line"><span>Zahlart</span><span>${tx.method === 'karte' ? 'Karte' : 'Bar'}</span></div>
+    <div class="receipt-line"><span>Zahlart</span><span>${methodLabel}</span></div>
   `;
-  if (tx.method === 'bar'){
+  if (tx.method === 'split'){
+    html += `
+      <div class="receipt-line"><span>davon Bar</span><span>${fmt(tx.barAmount)}</span></div>
+      <div class="receipt-line"><span>davon Karte</span><span>${fmt(tx.karteAmount)}</span></div>
+    `;
+  }
+  if (tx.method === 'bar' || tx.method === 'split'){
     html += `
       <div class="receipt-line"><span>Gegeben</span><span>${fmt(tx.given)}</span></div>
       <div class="receipt-line"><span>Rückgeld</span><span>${fmt(tx.change)}</span></div>
@@ -2884,12 +3139,13 @@ function buildReceiptHtml(tx){
 // ---- pay ----
 document.getElementById('payBtn').addEventListener('click', () => {
   const {brutto, netto, mwst, bruttoVorRabatt, discountAmount, mwstBreakdown} = calcTotals();
-  const change = paymentMethod === 'bar' ? (given - brutto) : 0;
+  const cashTarget = paymentMethod === 'split' ? splitBarAmount : (paymentMethod === 'bar' ? brutto : 0);
+  const change = (paymentMethod === 'bar' || paymentMethod === 'split') ? (given - cashTarget) : 0;
   const now = new Date();
   txCounter += 1;
 
   let changeBreakdown = [];
-  if (paymentMethod === 'bar'){
+  if (paymentMethod === 'bar' || paymentMethod === 'split'){
     const changeCents = Math.round(change * 100);
     const givenCents = Math.round(given * 100);
     // Rückgeld aus dem Kassenbestand entnehmen
@@ -2905,24 +3161,30 @@ document.getElementById('payBtn').addEventListener('click', () => {
     updateCashTotalDisplay();
   }
 
+  const karteAmount = paymentMethod === 'split' ? Math.max(0, brutto - splitBarAmount) : (paymentMethod === 'karte' ? brutto : 0);
+  const barAmount = paymentMethod === 'split' ? splitBarAmount : (paymentMethod === 'bar' ? brutto : 0);
+
   const tx = {
     id: txCounter,
     date: now.toLocaleDateString('de-DE'),
     time: now.toLocaleTimeString('de-DE'),
+    employee: currentEmployee || 'Unbekannt',
     items: Object.keys(cart).map(id => {
       const p = PRODUCTS.find(x => x.id === id);
-      return {id, name: p.name, qty: cart[id], price: p.price};
+      return {id, name: p.name, qty: cart[id], price: p.price, rate: getMwstRate(p.category)};
     }),
     netto, mwst, brutto, bruttoVorRabatt, discountAmount, mwstBreakdown,
     discountPercent, method: paymentMethod,
-    given: paymentMethod === 'bar' ? given : brutto,
+    barAmount, karteAmount,
+    given: (paymentMethod === 'bar' || paymentMethod === 'split') ? given : brutto,
     change,
     changeBreakdown,
+    itemsReturned: {},
     voided: false
   };
   transactions.push(tx);
 
-  if (paymentMethod === 'bar'){
+  if (paymentMethod === 'bar' || paymentMethod === 'split'){
     playCashSound();
     setTimeout(playReceiptPrintSound, 280);
   } else {
@@ -2938,6 +3200,8 @@ document.getElementById('payBtn').addEventListener('click', () => {
     given = 0;
     discountPercent = 0;
     ageVerifiedForSale = false;
+    splitBarAmount = 0;
+    document.getElementById('splitBarInput').value = '';
     document.querySelectorAll('.discount-chips button').forEach(x => x.classList.toggle('active', Number(x.dataset.pct) === 0));
     document.getElementById('givenInput').value = '';
     renderAll();
@@ -2946,6 +3210,8 @@ document.getElementById('payBtn').addEventListener('click', () => {
 
 // ---- Wareneingang: automatische Auffüllung + Beleg-Erstellung ----
 let wareneingangDocs = [];
+let returns = []; // Teilrückgaben — je Vorgang eigener Beleg, unabhängig vom ursprünglichen Bon
+let returnCounter = 9000;
 let weDocCounter = 5000;
 
 // Protokolle für den Endbericht — halten fest, was in dieser Sitzung an Sortiment/Struktur verändert wurde
@@ -2954,10 +3220,10 @@ let newCategoriesLog = [];
 let deletedProductsLog = [];
 
 function countLowStock(){
-  return PRODUCTS.filter(p => stock[p.id] <= MELDEBESTAND).length;
+  return PRODUCTS.filter(p => !p.isManual && stock[p.id] <= MELDEBESTAND).length;
 }
 function neededUnitsTotal(){
-  return PRODUCTS.reduce((sum, p) => {
+  return PRODUCTS.filter(p => !p.isManual).reduce((sum, p) => {
     const need = REFERENZ_BESTAND - stock[p.id];
     return sum + (stock[p.id] <= MELDEBESTAND && need > 0 ? need : 0);
   }, 0);
@@ -3034,7 +3300,7 @@ function renderWeHistory(){
 
 function runAutoRestock(){
   const items = [];
-  PRODUCTS.forEach(p => {
+  PRODUCTS.filter(p => !p.isManual).forEach(p => {
     const before = stock[p.id];
     if (before <= MELDEBESTAND){
       const needed = REFERENZ_BESTAND - before;
@@ -3084,9 +3350,10 @@ const AUSBUCH_GRUENDE = ['Schwund', 'Beschädigt', 'Ablauf/MHD', 'Inventurkorrek
 const REFERENZ_BESTAND = 30; // Startbestand laut Lager-Tabelle, dient als "voller Balken"
 
 function renderLagerStats(){
-  const total = PRODUCTS.length;
-  const lowCount = PRODUCTS.filter(p => stock[p.id] <= MELDEBESTAND).length;
-  const totalUnits = PRODUCTS.reduce((s,p) => s + stock[p.id], 0);
+  const realProducts = PRODUCTS.filter(p => !p.isManual);
+  const total = realProducts.length;
+  const lowCount = realProducts.filter(p => stock[p.id] <= MELDEBESTAND).length;
+  const totalUnits = realProducts.reduce((s,p) => s + stock[p.id], 0);
   document.getElementById('lagerStats').innerHTML = `
     <div class="lager-stat">
       <div class="lsnum">${total}</div>
@@ -3162,7 +3429,7 @@ document.getElementById('deleteProductNoBtn').addEventListener('click', () => {
 function renderLagerCards(flashId, flashType){
   const wrap = document.getElementById('lagerCards');
   wrap.innerHTML = '';
-  let list = PRODUCTS.slice();
+  let list = PRODUCTS.filter(p => !p.isManual);
   if (lagerCategory !== 'Alle'){
     list = list.filter(p => p.category === lagerCategory);
   }
@@ -3484,6 +3751,44 @@ document.getElementById('cashResetBtn').addEventListener('click', () => {
   updateCashTotalDisplay();
 });
 
+// ---- Mitarbeiter-Anmeldung ----
+function updateEmployeeBtn(){
+  const btn = document.getElementById('employeeBtn');
+  if (currentEmployee){
+    btn.textContent = '👤 ' + currentEmployee;
+    btn.classList.add('logged-in');
+  } else {
+    btn.textContent = '👤 – nicht angemeldet –';
+    btn.classList.remove('logged-in');
+  }
+}
+document.getElementById('employeeBtn').addEventListener('click', () => {
+  document.getElementById('employeeNameInput').value = currentEmployee;
+  document.getElementById('employeeOverlay').classList.add('show');
+  document.getElementById('employeeNameInput').focus();
+});
+document.getElementById('employeeConfirmBtn').addEventListener('click', () => {
+  const name = document.getElementById('employeeNameInput').value.trim();
+  if (!name){
+    playErrorSound();
+    showToast('Bitte einen Namen eingeben.');
+    return;
+  }
+  currentEmployee = name;
+  updateEmployeeBtn();
+  document.getElementById('employeeOverlay').classList.remove('show');
+  showToast(`Angemeldet als ${name}.`);
+});
+document.getElementById('employeeLogoutBtn').addEventListener('click', () => {
+  currentEmployee = '';
+  updateEmployeeBtn();
+  document.getElementById('employeeOverlay').classList.remove('show');
+  showToast('Abgemeldet.');
+});
+document.getElementById('employeeNameInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('employeeConfirmBtn').click();
+});
+
 // ---- Alterssperre ----
 document.getElementById('ageYesBtn').addEventListener('click', () => {
   document.getElementById('ageOverlay').classList.remove('show');
@@ -3510,29 +3815,43 @@ function renderBonsTable(){
   transactions.slice().reverse().forEach(tx => {
     const row = document.createElement('div');
     row.className = 'bons-row';
+    const fullyReturned = tx.items.every(it => ((tx.itemsReturned && tx.itemsReturned[it.id]) || 0) >= it.qty);
     row.innerHTML = `
       <div class="bnr">#${tx.id}</div>
       <div class="btime">${tx.date}<br>${tx.time}</div>
       <div class="bamt">${fmt(tx.brutto)}</div>
-      <div class="bstatus ${tx.voided ? 'void' : 'paid'}">${tx.voided ? 'Storniert' : (tx.method === 'karte' ? 'Karte' : 'Bar')}</div>
+      <div class="bstatus ${tx.voided ? 'void' : 'paid'}">${tx.voided ? 'Storniert' : (tx.method === 'karte' ? 'Karte' : tx.method === 'split' ? 'Split' : 'Bar')}</div>
       <div class="bactions">
         <button data-act="view">Anzeigen</button>
+        ${(!tx.voided && !fullyReturned) ? '<button data-act="return" class="no-key-sound">Teilrückgabe</button>' : ''}
         ${tx.voided ? '' : '<button data-act="void" class="void-btn no-key-sound">Stornieren</button>'}
       </div>
     `;
     row.querySelector('[data-act="view"]').onclick = () => {
+      document.getElementById('bonsOverlay').classList.remove('show');
       document.getElementById('receiptBody').innerHTML = buildReceiptHtml(tx) +
         '<button class="receipt-close" id="closeReceipt2">Schließen</button>';
       document.getElementById('overlay').classList.add('show');
       document.getElementById('closeReceipt2').onclick = () => {
         document.getElementById('overlay').classList.remove('show');
+        document.getElementById('bonsOverlay').classList.add('show');
       };
     };
+    const returnBtn = row.querySelector('[data-act="return"]');
+    if (returnBtn){
+      returnBtn.onclick = () => openReturnOverlay(tx);
+    }
     const voidBtn = row.querySelector('[data-act="void"]');
     if (voidBtn){
       voidBtn.onclick = () => {
-        tx.items.forEach(it => { adjustStock(it.id, it.qty, 'Bon #' + tx.id + ' storniert'); });
-        if (tx.method === 'bar'){
+        tx.items.forEach(it => {
+          const already = (tx.itemsReturned && tx.itemsReturned[it.id]) || 0;
+          const stillOut = it.qty - already;
+          if (stillOut > 0 && stock[it.id] !== undefined){
+            adjustStock(it.id, stillOut, 'Bon #' + tx.id + ' storniert');
+          }
+        });
+        if (tx.method === 'bar' || tx.method === 'split'){
           // Kassenbestand zurückdrehen: Rückgeld war raus, Gegeben-Betrag kommt wieder raus (an Kunden zurück)
           if (tx.changeBreakdown){
             tx.changeBreakdown.forEach(b => { cashDrawer[b.cents] = (cashDrawer[b.cents] || 0) + b.count; });
@@ -3553,6 +3872,140 @@ function renderBonsTable(){
     wrap.appendChild(row);
   });
 }
+
+// ---- Teilrückgabe einzelner Artikel eines Bons ----
+let pendingReturnTx = null;
+function openReturnOverlay(tx){
+  pendingReturnTx = tx;
+  document.getElementById('bonsOverlay').classList.remove('show');
+  document.getElementById('returnBonId').textContent = tx.id;
+  const wrap = document.getElementById('returnItemsTable');
+  wrap.innerHTML = '';
+  let anyReturnable = false;
+  tx.items.forEach(it => {
+    const already = (tx.itemsReturned && tx.itemsReturned[it.id]) || 0;
+    const remaining = it.qty - already;
+    if (remaining <= 0) return;
+    anyReturnable = true;
+    const row = document.createElement('div');
+    row.className = 'return-row';
+    row.innerHTML = `
+      <div class="rname">${it.name}</div>
+      <div class="rmeta">${it.qty} gekauft</div>
+      <div class="rmeta">${already} zurück</div>
+      <input type="number" min="0" max="${remaining}" value="0" data-id="${it.id}" data-max="${remaining}">
+    `;
+    wrap.appendChild(row);
+  });
+  if (!anyReturnable){
+    wrap.innerHTML = '<div class="return-empty">Alle Artikel dieses Bons wurden bereits zurückgegeben.</div>';
+  }
+  document.getElementById('returnOverlay').classList.add('show');
+}
+document.getElementById('returnCloseBtn').addEventListener('click', () => {
+  document.getElementById('returnOverlay').classList.remove('show');
+  document.getElementById('bonsOverlay').classList.add('show');
+  pendingReturnTx = null;
+});
+document.getElementById('returnConfirmBtn').addEventListener('click', () => {
+  const tx = pendingReturnTx;
+  if (!tx) return;
+  const inputs = document.querySelectorAll('#returnItemsTable input[type="number"]');
+  const toReturn = [];
+  let valid = true;
+  inputs.forEach(inp => {
+    const val = parseInt(inp.value, 10) || 0;
+    const max = parseInt(inp.dataset.max, 10);
+    if (val < 0 || val > max) valid = false;
+    if (val > 0) toReturn.push({id: inp.dataset.id, qty: val});
+  });
+  if (!valid){
+    playErrorSound();
+    showToast('Eine Rückgabemenge ist ungültig.');
+    return;
+  }
+  if (toReturn.length === 0){
+    showToast('Bitte mindestens eine Menge angeben.');
+    return;
+  }
+
+  let totalRefundBrutto = 0;
+  let totalRefundNetto = 0;
+  let totalRefundMwst = 0;
+  const docItems = [];
+
+  toReturn.forEach(r => {
+    const item = tx.items.find(it => it.id === r.id);
+    const rate = item.rate !== undefined ? item.rate : 0.19;
+    const discountFactor = 1 - (tx.discountPercent || 0) / 100;
+    const refundBrutto = Math.round(item.price * r.qty * discountFactor * 100) / 100;
+    const refundNetto = refundBrutto / (1 + rate);
+    const refundMwst = refundBrutto - refundNetto;
+
+    totalRefundBrutto += refundBrutto;
+    totalRefundNetto += refundNetto;
+    totalRefundMwst += refundMwst;
+
+    if (!tx.itemsReturned) tx.itemsReturned = {};
+    tx.itemsReturned[r.id] = (tx.itemsReturned[r.id] || 0) + r.qty;
+
+    if (stock[r.id] !== undefined){
+      adjustStock(r.id, r.qty, 'Rückgabe Bon #' + tx.id);
+    }
+    docItems.push({id: r.id, name: item.name, qty: r.qty, refund: refundBrutto});
+  });
+
+  // Geld zurückgeben: bei Bar voll, bei Split nur der anteilige Bar-Anteil, bei Karte nur rechnerisch
+  const cashRatio = tx.method === 'bar' ? 1 : (tx.method === 'split' && tx.brutto > 0 ? tx.barAmount / tx.brutto : 0);
+  if (cashRatio > 0){
+    const refundCents = Math.round(totalRefundBrutto * cashRatio * 100);
+    breakdownChange(refundCents).forEach(b => {
+      cashDrawer[b.cents] = Math.max(0, (cashDrawer[b.cents] || 0) - b.count);
+    });
+    dbSaveDrawer();
+    updateCashTotalDisplay();
+  }
+
+  returnCounter += 1;
+  const now = new Date();
+  const doc = {
+    id: returnCounter,
+    bonId: tx.id,
+    date: now.toLocaleDateString('de-DE'),
+    time: now.toLocaleTimeString('de-DE'),
+    items: docItems,
+    totalRefundBrutto, totalRefundNetto, totalRefundMwst,
+    totalRefund: totalRefundBrutto,
+    method: tx.method
+  };
+  returns.push(doc);
+
+  document.getElementById('returnOverlay').classList.remove('show');
+  pendingReturnTx = null;
+  playStornoSound();
+  showToast(`Rückgabe gebucht: ${fmt(totalRefundBrutto)} erstattet.`);
+  renderGrid();
+  renderBonsTable();
+
+  const html = `
+    <h2>RÜCKGABE</h2>
+    <div class="sub">Beleg Nr. ${doc.id} · zu Bon #${doc.bonId}<br>${doc.date} ${doc.time}</div>
+    <hr>
+    ${docItems.map(it => `<div class="receipt-line"><span class="rname">${it.qty}× ${it.name}</span><span>−${fmt(it.refund)}</span></div>`).join('')}
+    <hr>
+    <div class="receipt-line"><span>Netto</span><span>−${fmt(totalRefundNetto)}</span></div>
+    <div class="receipt-line"><span>MwSt</span><span>−${fmt(totalRefundMwst)}</span></div>
+    <div class="rtotal"><span>Erstattet</span><span>−${fmt(totalRefundBrutto)}</span></div>
+    <div class="rfoot">Teilrückgabe · MARKT/24</div>
+    <button class="receipt-close" id="returnDocCloseBtn">Schließen</button>
+  `;
+  document.getElementById('returnDocBody').innerHTML = html;
+  document.getElementById('returnDocOverlay').classList.add('show');
+  document.getElementById('returnDocCloseBtn').onclick = () => {
+    document.getElementById('returnDocOverlay').classList.remove('show');
+    document.getElementById('bonsOverlay').classList.add('show');
+  };
+});
 
 document.getElementById('bonsBtn').addEventListener('click', () => {
   renderBonsTable();
@@ -3610,10 +4063,15 @@ document.getElementById('reportBtn').addEventListener('click', () => {
   const voided = transactions.filter(t => t.voided);
   const bar = valid.filter(t => t.method === 'bar');
   const karte = valid.filter(t => t.method === 'karte');
+  const split = valid.filter(t => t.method === 'split');
   const sum = arr => arr.reduce((s,t) => s + t.brutto, 0);
   const sumNetto = arr => arr.reduce((s,t) => s + t.netto, 0);
   const sumMwst = arr => arr.reduce((s,t) => s + t.mwst, 0);
   const sumDisc = arr => arr.reduce((s,t) => s + t.discountAmount, 0);
+  // Bar-/Kartenanteil je Bon berücksichtigen (bei Split beides gleichzeitig)
+  const barUmsatz = valid.reduce((s,t) => s + (t.method === 'bar' ? t.brutto : (t.method === 'split' ? t.barAmount : 0)), 0);
+  const karteUmsatz = valid.reduce((s,t) => s + (t.method === 'karte' ? t.brutto : (t.method === 'split' ? t.karteAmount : 0)), 0);
+  const returnsTotal = returns.reduce((s,r) => s + r.totalRefund, 0);
   const now = new Date();
 
   const html = `
@@ -3623,15 +4081,18 @@ document.getElementById('reportBtn').addEventListener('click', () => {
     <div class="receipt-line"><span>Verkäufe (gültig)</span><span>${valid.length}</span></div>
     <div class="receipt-line"><span>davon Bar</span><span>${bar.length}</span></div>
     <div class="receipt-line"><span>davon Karte</span><span>${karte.length}</span></div>
+    <div class="receipt-line"><span>davon Split</span><span>${split.length}</span></div>
     <div class="receipt-line"><span>Stornierte Bons</span><span>${voided.length}</span></div>
+    <div class="receipt-line"><span>Teilrückgaben</span><span>${returns.length}</span></div>
     <hr>
     <div class="receipt-line"><span>Nettoumsatz</span><span>${fmt(sumNetto(valid))}</span></div>
     <div class="receipt-line"><span>MwSt-Summe</span><span>${fmt(sumMwst(valid))}</span></div>
     <div class="receipt-line"><span>Gewährte Rabatte</span><span>−${fmt(sumDisc(valid))}</span></div>
-    <div class="rtotal"><span>Bruttoumsatz</span><span>${fmt(sum(valid))}</span></div>
+    <div class="receipt-line"><span>Rückgaben</span><span>−${fmt(returnsTotal)}</span></div>
+    <div class="rtotal"><span>Bruttoumsatz (nach Rückgaben)</span><span>${fmt(sum(valid) - returnsTotal)}</span></div>
     <hr>
-    <div class="receipt-line"><span>davon Bar-Umsatz</span><span>${fmt(sum(bar))}</span></div>
-    <div class="receipt-line"><span>davon Karten-Umsatz</span><span>${fmt(sum(karte))}</span></div>
+    <div class="receipt-line"><span>davon Bar-Umsatz</span><span>${fmt(barUmsatz)}</span></div>
+    <div class="receipt-line"><span>davon Karten-Umsatz</span><span>${fmt(karteUmsatz)}</span></div>
     <div class="rfoot">Kasse 03 · MARKT/24<br>Dieser Bericht schließt den Kassenzeitraum nicht ab.</div>
     <button class="receipt-close" id="closeReportBtn">Schließen</button>
   `;
@@ -3649,9 +4110,13 @@ function buildFinalReportText(){
   const voided = transactions.filter(t => t.voided);
   const bar = valid.filter(t => t.method === 'bar');
   const karte = valid.filter(t => t.method === 'karte');
+  const split = valid.filter(t => t.method === 'split');
   const sumBrutto = arr => arr.reduce((s, t) => s + t.brutto, 0);
   const sumNetto = arr => arr.reduce((s, t) => s + t.netto, 0);
   const sumDisc = arr => arr.reduce((s, t) => s + t.discountAmount, 0);
+  const barUmsatz = valid.reduce((s,t) => s + (t.method === 'bar' ? t.brutto : (t.method === 'split' ? t.barAmount : 0)), 0);
+  const karteUmsatz = valid.reduce((s,t) => s + (t.method === 'karte' ? t.brutto : (t.method === 'split' ? t.karteAmount : 0)), 0);
+  const returnsTotal = returns.reduce((s, r) => s + r.totalRefund, 0);
 
   // MwSt aggregiert nach Steuersatz über alle gültigen Bons
   const mwstByRate = {};
@@ -3661,8 +4126,18 @@ function buildFinalReportText(){
     });
   });
 
-  const totalUnitsStock = PRODUCTS.reduce((s, p) => s + (stock[p.id] || 0), 0);
-  const lowStock = PRODUCTS.filter(p => stock[p.id] <= MELDEBESTAND);
+  const realProducts = PRODUCTS.filter(p => !p.isManual);
+  const totalUnitsStock = realProducts.reduce((s, p) => s + (stock[p.id] || 0), 0);
+  const lowStock = realProducts.filter(p => stock[p.id] <= MELDEBESTAND);
+
+  // Verkäufe nach Mitarbeiter/in
+  const byEmployee = {};
+  valid.forEach(t => {
+    const emp = t.employee || 'Unbekannt';
+    if (!byEmployee[emp]) byEmployee[emp] = {count: 0, brutto: 0};
+    byEmployee[emp].count += 1;
+    byEmployee[emp].brutto += t.brutto;
+  });
 
   const weTotalUnits = wareneingangDocs.reduce((s, d) => s + d.totalUnits, 0);
   const movEingang = movementLog.filter(m => m.type === 'eingang');
@@ -3680,23 +4155,31 @@ function buildFinalReportText(){
   t += `Kassenstart dieser Sitzung: ${sessionStart.toLocaleTimeString('de-DE')}\n\n`;
 
   t += "VERKÄUFE\n" + L + "\n";
-  t += `Gültige Bons: ${valid.length}   (Bar: ${bar.length}, Karte: ${karte.length})\n`;
+  t += `Gültige Bons: ${valid.length}   (Bar: ${bar.length}, Karte: ${karte.length}, Split: ${split.length})\n`;
   t += `Stornierte Bons: ${voided.length}\n`;
+  t += `Teilrückgaben: ${returns.length}\n`;
   t += `Nettoumsatz: ${fmt(sumNetto(valid))}\n`;
   Object.keys(mwstByRate).sort((a, b) => b - a).forEach(rate => {
     t += `MwSt ${(rate * 100).toFixed(0)}%: ${fmt(mwstByRate[rate])}\n`;
   });
   t += `Gewährte Rabatte: −${fmt(sumDisc(valid))}\n`;
-  t += `Bruttoumsatz: ${fmt(sumBrutto(valid))}\n`;
-  t += `  davon Bar-Umsatz: ${fmt(sumBrutto(bar))}\n`;
-  t += `  davon Karten-Umsatz: ${fmt(sumBrutto(karte))}\n\n`;
+  t += `Rückgaben: −${fmt(returnsTotal)}\n`;
+  t += `Bruttoumsatz (nach Rückgaben): ${fmt(sumBrutto(valid) - returnsTotal)}\n`;
+  t += `  davon Bar-Umsatz: ${fmt(barUmsatz)}\n`;
+  t += `  davon Karten-Umsatz: ${fmt(karteUmsatz)}\n\n`;
+
+  t += "VERKÄUFE NACH MITARBEITER/IN\n" + L + "\n";
+  Object.keys(byEmployee).forEach(emp => {
+    t += `${emp.padEnd(24)} ${byEmployee[emp].count} Bons, ${fmt(byEmployee[emp].brutto)}\n`;
+  });
+  t += "\n";
 
   t += "LAGERBESTAND (AKTUELL)\n" + L + "\n";
-  t += `Artikel im Sortiment: ${PRODUCTS.length}\n`;
+  t += `Artikel im Sortiment: ${realProducts.length}\n`;
   t += `Stück gesamt auf Lager: ${totalUnitsStock}\n`;
   t += `Artikel unter/auf Meldebestand (${MELDEBESTAND}): ${lowStock.length}\n\n`;
   t += `${"Nr.".padEnd(7)}${"Artikel".padEnd(28)}${"Warengruppe".padEnd(20)}${"Bestand"}\n`;
-  PRODUCTS.forEach(p => {
+  realProducts.forEach(p => {
     t += `${p.id.padEnd(7)}${p.name.slice(0,27).padEnd(28)}${p.category.slice(0,19).padEnd(20)}${stock[p.id]}\n`;
   });
   t += "\n";
@@ -3705,6 +4188,13 @@ function buildFinalReportText(){
   t += `Vorgänge: ${wareneingangDocs.length}   Nachgelieferte Stückzahl gesamt: ${weTotalUnits}\n`;
   wareneingangDocs.forEach(d => {
     t += `  Beleg #${d.id} — ${d.date} ${d.time} — ${d.items.length} Artikel, +${d.totalUnits} Stk.\n`;
+  });
+  t += "\n";
+
+  t += "RÜCKGABEN (TEILRÜCKGABEN)\n" + L + "\n";
+  t += `Vorgänge: ${returns.length}   Erstattete Summe gesamt: ${fmt(returnsTotal)}\n`;
+  returns.forEach(r => {
+    t += `  Beleg #${r.id} — zu Bon #${r.bonId} — ${r.date} ${r.time} — −${fmt(r.totalRefund)}\n`;
   });
   t += "\n";
 
@@ -3797,7 +4287,11 @@ document.getElementById('saveStateBtn').addEventListener('click', () => {
     newCategoriesLog: newCategoriesLog,
     deletedProductsLog: deletedProductsLog,
     txCounter: txCounter,
-    weDocCounter: weDocCounter
+    weDocCounter: weDocCounter,
+    returns: returns,
+    returnCounter: returnCounter,
+    currentEmployee: currentEmployee,
+    manualItemCounter: manualItemCounter
   };
   const json = JSON.stringify(saveData, null, 2);
   const blob = new Blob([json], {type: 'application/json'});
@@ -3866,6 +4360,11 @@ document.getElementById('loadFileInput').addEventListener('change', (e) => {
     deletedProductsLog = data.deletedProductsLog || [];
     txCounter = data.txCounter || 1000;
     weDocCounter = data.weDocCounter || 5000;
+    returns = data.returns || [];
+    returnCounter = data.returnCounter || 9000;
+    currentEmployee = data.currentEmployee || '';
+    manualItemCounter = data.manualItemCounter || 1;
+    updateEmployeeBtn();
 
     // Warenkorb der aktuellen Sitzung leeren (gehört nicht zum gespeicherten Stand)
     cart = {};
