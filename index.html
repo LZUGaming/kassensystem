@@ -2569,7 +2569,13 @@ function renderGrid(){
   });
 }
 
+let ageVerifiedForSale = false; // einmal pro Kunde/Verkauf bestätigt, dann nicht nochmal fragen
+
 function showAgeGate(productName, onConfirm){
+  if (ageVerifiedForSale){
+    onConfirm();
+    return;
+  }
   document.getElementById('ageText').textContent =
     `„${productName}“ ist ein alkoholisches Produkt. Ist der Kunde nachweislich mindestens 18 Jahre alt?`;
   ageGateCallback = onConfirm;
@@ -2832,6 +2838,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   cartOrder = [];
   given = 0;
   discountPercent = 0;
+  ageVerifiedForSale = false;
   document.querySelectorAll('.discount-chips button').forEach(x => x.classList.toggle('active', Number(x.dataset.pct) === 0));
   document.getElementById('givenInput').value = '';
   playStornoSound();
@@ -2930,6 +2937,7 @@ document.getElementById('payBtn').addEventListener('click', () => {
     cartOrder = [];
     given = 0;
     discountPercent = 0;
+    ageVerifiedForSale = false;
     document.querySelectorAll('.discount-chips button').forEach(x => x.classList.toggle('active', Number(x.dataset.pct) === 0));
     document.getElementById('givenInput').value = '';
     renderAll();
@@ -3479,6 +3487,7 @@ document.getElementById('cashResetBtn').addEventListener('click', () => {
 // ---- Alterssperre ----
 document.getElementById('ageYesBtn').addEventListener('click', () => {
   document.getElementById('ageOverlay').classList.remove('show');
+  ageVerifiedForSale = true;
   const cb = ageGateCallback;
   ageGateCallback = null;
   if (cb) cb();
