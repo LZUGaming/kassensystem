@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>MARKT/24 Kassensystem</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=Dseg7+Classic&display=swap" rel="stylesheet">
 <style>
-@font-face {
-  font-family: 'DSEG7';
-  src: local('DSEG7 Classic');
-}
+/* Bewusst KEINE externen Font-Ladungen (kein Google Fonts CDN) — läuft dadurch
+   auch komplett offline. 'Space Grotesk'/'Inter' bleiben als Wunsch-Schriften
+   vorn in der Liste (falls lokal auf dem Gerät installiert), fallen aber sauber
+   auf verbreitete Systemschriften zurück statt lautlos auf eine hässliche
+   Standardschrift, wenn kein Internet verfügbar ist. */
 :root{
   --bg: #14181d;
   --panel: #1c2128;
@@ -28,7 +27,7 @@ html,body{
   height:100%;
   background: var(--bg);
   color: var(--text);
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   overflow:hidden;
 }
 #app{
@@ -62,7 +61,7 @@ html,body{
 }
 @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
 .brand h1{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-size:17px;
   letter-spacing:1px;
   font-weight:700;
@@ -76,7 +75,7 @@ html,body{
   color: var(--muted);
 }
 .clock{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   color: var(--text);
   font-size:14px;
 }
@@ -96,7 +95,7 @@ html,body{
   font-size:12px;
   font-weight:600;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .lager-btn:hover{ border-color: var(--teal); }
 .cash-total{
@@ -106,7 +105,7 @@ html,body{
   border-radius: 4px;
   font-size:12.5px;
   font-weight:700;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   color: var(--amber);
   letter-spacing:.3px;
   white-space:nowrap;
@@ -196,7 +195,7 @@ html,body{
   flex-shrink:0;
 }
 .drawer-tray-head h2{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-size:15px;
   letter-spacing:.3px;
 }
@@ -233,7 +232,7 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:13px;
   color:rgba(255,255,255,.95);
@@ -255,7 +254,7 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:10px;
   color:#3a2a05;
@@ -278,13 +277,13 @@ html,body{
   font-size:9.5px;
   font-weight:700;
   color: var(--text);
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .drawer-note.zero, .drawer-coin.zero{ opacity:.28 !important; }
 .drawer-tray-total{
   padding: 12px 18px;
   border-top:1px solid var(--line);
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:15px;
   color: var(--amber);
@@ -325,7 +324,7 @@ html,body{
   border-radius:7px;
   font-size:12.5px;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .menu-dropdown button:hover{ background: var(--panel); color: var(--teal); }
 
@@ -393,7 +392,7 @@ html,body{
   color: var(--text);
   font-size:14px;
   outline:none;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .search-box input:focus{ border-color: var(--teal); }
 .search-box::before{
@@ -411,15 +410,15 @@ html,body{
   border-radius:10px;
   padding: 12px 14px;
   color: var(--amber);
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-size:14px;
   outline:none;
 }
-.scan-input::placeholder{ color: var(--muted); font-family:'Inter',sans-serif; }
+.scan-input::placeholder{ color: var(--muted); font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; }
 .scan-input:focus{ border-color: var(--amber); }
 
 .cat-title{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-size:13px;
   color: var(--muted);
   letter-spacing:1px;
@@ -460,7 +459,7 @@ html,body{
   top:8px; left:8px;
   background: var(--red);
   color:#2a0603;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:10px;
   padding:2px 6px;
@@ -486,7 +485,7 @@ html,body{
   align-items:flex-end;
 }
 .product .pprice{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   color: var(--teal);
   font-size:14px;
@@ -532,7 +531,7 @@ html,body{
   margin-bottom:2px;
 }
 .display .total-num{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:38px;
   color: var(--amber);
@@ -613,7 +612,7 @@ html,body{
 }
 .cart-item .ci-qty button:hover{ background: var(--teal); color:#06201c; }
 .cart-item .ci-line{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   color: var(--text);
   text-align:right;
@@ -650,7 +649,7 @@ html,body{
   border-top:1px dashed var(--line);
   margin-top:4px;
 }
-.summary .row.total .val{ color: var(--amber); font-family:'Space Grotesk',sans-serif; }
+.summary .row.total .val{ color: var(--amber); font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; }
 
 .pay-area{
   padding: 12px 16px 16px 16px;
@@ -670,7 +669,7 @@ html,body{
   border-radius:8px;
   padding:10px 10px;
   color: var(--text);
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-size:14px;
   outline:none;
   text-align:right;
@@ -705,7 +704,7 @@ html,body{
   font-size:11.5px;
   font-weight:600;
   cursor:pointer;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   min-width: 46px;
 }
 .quick-cash button.is-note{ border-color: rgba(63,214,192,0.3); }
@@ -721,7 +720,7 @@ html,body{
   color: var(--muted);
 }
 .change-row .val{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:16px;
   color: var(--green);
@@ -737,7 +736,7 @@ html,body{
   padding: 12px 0;
   border-radius:10px;
   border:none;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:13px;
   letter-spacing:.3px;
@@ -773,7 +772,7 @@ html,body{
   overflow-y:auto;
   background: #f4f1ea;
   color: #1b1b1b;
-  font-family: 'Space Grotesk', monospace;
+  font-family: 'Space Grotesk', 'Courier New', monospace;
   padding: 22px 20px 26px 20px;
   border-radius: 3px;
   box-shadow: 0 20px 60px rgba(0,0,0,.5);
@@ -831,7 +830,7 @@ html,body{
   color:#f4f1ea;
   border:none;
   border-radius:4px;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   cursor:pointer;
   font-size:13px;
@@ -857,7 +856,7 @@ html,body{
   border-bottom:1px solid var(--line);
 }
 .lager-head h2{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-size:16px;
   letter-spacing:.5px;
 }
@@ -887,7 +886,7 @@ html,body{
   font-size:12px !important;
   font-weight:600;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .new-product-btn:hover{ filter:brightness(1.15); color: var(--teal) !important; border-color: var(--teal) !important; }
 
@@ -923,7 +922,7 @@ html,body{
   color: var(--text);
   font-size:13px;
   outline:none;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .newprod-body input:focus, .newprod-body select:focus{ border-color: var(--teal); }
 .npcat-row{
@@ -941,17 +940,18 @@ html,body{
   font-size:12px;
   font-weight:600;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .npcat-add-btn:hover{ filter:brightness(1.15); }
 .npcat-newrow{
   display:none;
   gap:8px;
   margin-top:-4px;
+  flex-wrap:wrap;
 }
 .npcat-newrow.show{ display:flex; }
 .npcat-newrow input{
-  flex:1;
+  flex:1 1 140px;
   background: var(--panel-2);
   border:1px solid var(--line);
   border-radius:8px;
@@ -961,6 +961,17 @@ html,body{
   outline:none;
 }
 .npcat-newrow input:focus{ border-color: var(--teal); }
+.npcat-newrow select{
+  flex:1 1 150px;
+  background: var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding: 8px 8px;
+  color: var(--text);
+  font-size:12px;
+  outline:none;
+}
+.npcat-newrow select:focus{ border-color: var(--teal); }
 .npcat-newrow button{
   flex-shrink:0;
   border:1px solid var(--line);
@@ -1002,7 +1013,7 @@ html,body{
 }
 .newprod-preview strong{
   color: var(--amber);
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .newprod-submit{
   background: var(--teal);
@@ -1013,7 +1024,7 @@ html,body{
   font-weight:700;
   font-size:13px;
   cursor:pointer;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .newprod-submit:hover{ filter:brightness(1.1); }
 
@@ -1037,7 +1048,7 @@ html,body{
   padding: 9px 12px;
 }
 .lager-stat .lsnum{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:19px;
 }
@@ -1064,7 +1075,7 @@ html,body{
   color: var(--text);
   font-size:13px;
   outline:none;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .lager-searchrow input:focus{ border-color: var(--teal); }
 .lager-low-toggle{
@@ -1077,7 +1088,7 @@ html,body{
   font-size:12px;
   font-weight:600;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .lager-low-toggle:hover{ border-color: var(--red); color: var(--text); }
 .lager-low-toggle.active{
@@ -1100,7 +1111,7 @@ html,body{
   padding: 5px 12px;
   font-size:11.5px;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .lager-cat-chips button:hover{ color: var(--text); }
 .lager-cat-chips button.active{
@@ -1169,7 +1180,7 @@ html,body{
 }
 .lager-card-numbers{ text-align:right; flex-shrink:0; }
 .lager-card-numbers .lstock{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:18px;
 }
@@ -1218,7 +1229,7 @@ html,body{
   color: var(--text);
   font-size:11.5px;
   outline:none;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .lager-actions-row select:focus{ border-color: var(--teal); }
 .lager-actions-row button{
@@ -1228,7 +1239,7 @@ html,body{
   font-weight:700;
   cursor:pointer;
   white-space:nowrap;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .lz-in{
   background: rgba(89,214,124,0.12);
@@ -1286,7 +1297,7 @@ html,body{
 }
 .age-icon{ font-size:36px; margin-bottom:8px; }
 .age-panel h2{
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-size:17px;
   margin-bottom:10px;
 }
@@ -1305,7 +1316,7 @@ html,body{
   padding:11px 0;
   border-radius:9px;
   border:none;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:13px;
   cursor:pointer;
@@ -1320,7 +1331,7 @@ html,body{
   padding:11px 0;
   border-radius:9px;
   border:none;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:700;
   font-size:13px;
   cursor:pointer;
@@ -1346,7 +1357,7 @@ html,body{
   border-radius:8px;
   font-size:11.5px;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .cart-tools button:hover:not(:disabled){ border-color: var(--red); color: var(--red); }
 .cart-tools button:disabled{ opacity:.35; cursor:not-allowed; }
@@ -1378,7 +1389,7 @@ html,body{
   border-radius:7px;
   font-size:11.5px;
   cursor:pointer;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:600;
 }
 .discount-chips button:hover{ border-color: var(--teal); color: var(--text); }
@@ -1403,7 +1414,7 @@ html,body{
   font-size:12.5px;
   font-weight:600;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .pm-btn:hover{ color: var(--text); }
 .pm-btn.active{
@@ -1421,9 +1432,9 @@ html,body{
   border-bottom:1px solid var(--line);
   font-size:12px;
 }
-.bons-row .bnr{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.bons-row .bnr{ font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; font-weight:700; }
 .bons-row .btime{ color: var(--muted); font-size:11px; }
-.bons-row .bamt{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.bons-row .bamt{ font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; font-weight:700; }
 .bons-row .bstatus{
   font-size:10.5px;
   font-weight:700;
@@ -1464,7 +1475,7 @@ html,body{
   font-size:13px;
   font-weight:700;
   cursor:pointer;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .we-fill-btn:hover{ filter:brightness(1.15); }
 .we-fill-btn:disabled{ opacity:.4; cursor:not-allowed; filter:none; }
@@ -1484,9 +1495,9 @@ html,body{
   border-bottom:1px solid var(--line);
   font-size:12px;
 }
-.we-row .wenr{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.we-row .wenr{ font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; font-weight:700; }
 .we-row .wetime{ color: var(--muted); font-size:11px; }
-.we-row .wecount{ font-family:'Space Grotesk',sans-serif; font-weight:600; }
+.we-row .wecount{ font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; font-weight:600; }
 .we-row button{
   background: var(--panel-2);
   border:1px solid var(--line);
@@ -1517,7 +1528,7 @@ html,body{
 .move-row .mtype.eingang{ background: rgba(89,214,124,0.14); color: var(--green); }
 .move-row .mtype.ausgang{ background: rgba(255,107,94,0.14); color: var(--red); }
 .move-row .mname{ font-weight:600; }
-.move-row .mqty{ font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.move-row .mqty{ font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; font-weight:700; }
 .move-row .mreason{ color: var(--muted); font-size:11px; }
 .move-row .mtime{ color: var(--muted); font-size:10.5px; }
 
@@ -1530,9 +1541,9 @@ html,body{
   border-bottom:1px solid var(--line);
   font-size:12.5px;
 }
-.cash-row .cdenom{ font-weight:700; font-family:'Space Grotesk',sans-serif; }
+.cash-row .cdenom{ font-weight:700; font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; }
 .cash-row .ccount{ color: var(--muted); }
-.cash-row .csub{ text-align:right; font-family:'Space Grotesk',sans-serif; font-weight:600; }
+.cash-row .csub{ text-align:right; font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif; font-weight:600; }
 .cash-row.empty{ opacity:.4; }
 .cash-reset-row{
   padding: 10px 18px 16px 18px;
@@ -1548,7 +1559,7 @@ html,body{
   font-size:12.5px;
   font-weight:600;
   cursor:pointer;
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
 }
 .cash-reset-row button:hover{ border-color: var(--amber); color: var(--amber); }
 
@@ -1565,7 +1576,7 @@ html,body{
   border-radius:5px;
   padding:2px 7px;
   margin:2px 4px 2px 0;
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk','Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   font-weight:600;
   color: var(--text);
 }
@@ -1632,7 +1643,7 @@ html,body{
     </div>
     <div class="summary">
       <div class="row"><span>Nettobetrag</span><span id="sumNetto">0,00 €</span></div>
-      <div class="row"><span>MwSt (19%)</span><span id="sumMwst">0,00 €</span></div>
+      <div id="sumMwstRows"></div>
       <div class="row discount-row" id="discountRow" style="display:none;"><span>Rabatt</span><span id="sumDiscount">0,00 €</span></div>
       <div class="row total"><span>Bruttobetrag</span><span class="val" id="sumBrutto">0,00 €</span></div>
     </div>
@@ -1699,6 +1710,10 @@ html,body{
       </label>
       <div class="npcat-newrow" id="npNewCatRow">
         <input id="npNewCatName" type="text" placeholder="Name der neuen Warengruppe" autocomplete="off">
+        <select id="npNewCatMwst">
+          <option value="0.07">7% MwSt (Lebensmittel)</option>
+          <option value="0.19">19% MwSt (Standard)</option>
+        </select>
         <button id="npNewCatConfirm" class="no-key-sound">Anlegen</button>
         <button id="npNewCatCancel" class="no-key-sound">Abbrechen</button>
       </div>
@@ -1722,7 +1737,7 @@ html,body{
           Alkoholisch (18+ Alterssperre)
         </label>
       </div>
-      <div class="newprod-preview" id="npPreview">Nächste freie Artikelnummer in dieser Warengruppe: <strong id="npNextId">–</strong></div>
+      <div class="newprod-preview" id="npPreview">Nächste freie Artikelnummer in dieser Warengruppe: <strong id="npNextId">–</strong> · MwSt-Satz: <strong id="npMwstPreview">–</strong></div>
       <button class="newprod-submit" id="npSubmitBtn">Produkt anlegen</button>
     </div>
   </div>
@@ -2011,7 +2026,20 @@ let transactions = []; // abgeschlossene Verkäufe (für Bons-Historie & Tagesab
 let txCounter = 1000;
 const sessionStart = new Date();
 
-const MWST_RATE = 0.19;
+// MwSt nach Warengruppe statt einheitlich 19% — realistischer für einen Supermarkt:
+// In Deutschland sind die meisten Lebensmittel mit 7% besteuert, Getränke (auch alkoholfreie,
+// abgesehen von z.B. Milch/Leitungswasser) aber grundsätzlich mit dem vollen Satz von 19%.
+const CATEGORY_MWST = {
+  "Getränk": 0.19,
+  "Obst/Gemüse": 0.07,
+  "Backwaren": 0.07,
+  "Wurst/Fleischwaren": 0.07,
+  "Süßwaren": 0.07,
+  "Molkerreierzeugnisse": 0.07
+};
+function getMwstRate(category){
+  return CATEGORY_MWST[category] !== undefined ? CATEGORY_MWST[category] : 0.19;
+}
 
 function fmt(n){
   return n.toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}) + " €";
@@ -2439,23 +2467,48 @@ function renderCart(){
 }
 
 function calcTotals(){
-  let bruttoVorRabatt = 0;
+  const buckets = {}; // Steuersatz -> Bruttobetrag (vor Rabatt) in dieser Gruppe
   Object.keys(cart).forEach(id => {
     const p = PRODUCTS.find(x => x.id === id);
-    bruttoVorRabatt += p.price * cart[id];
+    const rate = getMwstRate(p.category);
+    buckets[rate] = (buckets[rate] || 0) + p.price * cart[id];
   });
+  const bruttoVorRabatt = Object.values(buckets).reduce((s, v) => s + v, 0);
   const discountAmount = bruttoVorRabatt * (discountPercent / 100);
+
+  // Rabatt anteilig auf die Steuersätze verteilen, dann je Satz Netto/MwSt zurückrechnen
+  let netto = 0;
+  let mwst = 0;
+  const mwstBreakdown = []; // [{rate, brutto, netto, mwst}], sortiert nach Steuersatz absteigend
+  Object.keys(buckets).map(Number).sort((a, b) => b - a).forEach(rate => {
+    const bucketBruttoVorRabatt = buckets[rate];
+    const share = bruttoVorRabatt > 0 ? bucketBruttoVorRabatt / bruttoVorRabatt : 0;
+    const bucketBrutto = bucketBruttoVorRabatt - discountAmount * share;
+    const bucketNetto = bucketBrutto / (1 + rate);
+    const bucketMwst = bucketBrutto - bucketNetto;
+    netto += bucketNetto;
+    mwst += bucketMwst;
+    if (bucketBrutto > 0.001){
+      mwstBreakdown.push({rate, brutto: bucketBrutto, netto: bucketNetto, mwst: bucketMwst});
+    }
+  });
   const brutto = bruttoVorRabatt - discountAmount;
-  const netto = brutto / (1 + MWST_RATE);
-  const mwst = brutto - netto;
-  return {brutto, netto, mwst, bruttoVorRabatt, discountAmount};
+  return {brutto, netto, mwst, bruttoVorRabatt, discountAmount, mwstBreakdown};
 }
 
 function renderSummary(){
-  const {brutto, netto, mwst, discountAmount} = calcTotals();
+  const {brutto, netto, mwst, discountAmount, mwstBreakdown} = calcTotals();
   document.getElementById('sumNetto').textContent = fmt(netto);
-  document.getElementById('sumMwst').textContent = fmt(mwst);
   document.getElementById('sumBrutto').textContent = fmt(brutto);
+
+  const mwstRowsEl = document.getElementById('sumMwstRows');
+  if (mwstBreakdown.length === 0){
+    mwstRowsEl.innerHTML = '<div class="row"><span>MwSt</span><span>0,00 €</span></div>';
+  } else {
+    mwstRowsEl.innerHTML = mwstBreakdown.map(b =>
+      `<div class="row"><span>MwSt ${(b.rate * 100).toFixed(0)}%</span><span>${fmt(b.mwst)}</span></div>`
+    ).join('');
+  }
 
   const discountRow = document.getElementById('discountRow');
   if (discountAmount > 0){
@@ -2571,7 +2624,11 @@ function buildReceiptHtml(tx){
   }
   html += `
     <div class="receipt-line"><span>Nettobetrag</span><span>${fmt(tx.netto)}</span></div>
-    <div class="receipt-line"><span>MwSt 19%</span><span>${fmt(tx.mwst)}</span></div>
+  `;
+  (tx.mwstBreakdown || []).forEach(b => {
+    html += `<div class="receipt-line"><span>MwSt ${(b.rate * 100).toFixed(0)}%</span><span>${fmt(b.mwst)}</span></div>`;
+  });
+  html += `
     <div class="rtotal"><span>Bruttobetrag</span><span>${fmt(tx.brutto)}</span></div>
     <hr>
     <div class="receipt-line"><span>Zahlart</span><span>${tx.method === 'karte' ? 'Karte' : 'Bar'}</span></div>
@@ -2588,7 +2645,7 @@ function buildReceiptHtml(tx){
 
 // ---- pay ----
 document.getElementById('payBtn').addEventListener('click', () => {
-  const {brutto, netto, mwst, bruttoVorRabatt, discountAmount} = calcTotals();
+  const {brutto, netto, mwst, bruttoVorRabatt, discountAmount, mwstBreakdown} = calcTotals();
   const change = paymentMethod === 'bar' ? (given - brutto) : 0;
   const now = new Date();
   txCounter += 1;
@@ -2618,7 +2675,7 @@ document.getElementById('payBtn').addEventListener('click', () => {
       const p = PRODUCTS.find(x => x.id === id);
       return {id, name: p.name, qty: cart[id], price: p.price};
     }),
-    netto, mwst, brutto, bruttoVorRabatt, discountAmount,
+    netto, mwst, brutto, bruttoVorRabatt, discountAmount, mwstBreakdown,
     discountPercent, method: paymentMethod,
     given: paymentMethod === 'bar' ? given : brutto,
     change,
@@ -3021,12 +3078,14 @@ renderNpCategoryOptions();
 function updateNpPreview(){
   const cat = npCategorySelect.value;
   document.getElementById('npNextId').textContent = nextArticleNumber(cat);
+  document.getElementById('npMwstPreview').textContent = (getMwstRate(cat) * 100).toFixed(0) + '%';
 }
 npCategorySelect.addEventListener('change', updateNpPreview);
 
 function closeNpNewCatRow(){
   document.getElementById('npNewCatRow').classList.remove('show');
   document.getElementById('npNewCatName').value = '';
+  document.getElementById('npNewCatMwst').selectedIndex = 0;
 }
 
 document.getElementById('npNewCatBtn').addEventListener('click', () => {
@@ -3048,7 +3107,9 @@ document.getElementById('npNewCatConfirm').addEventListener('click', () => {
   }
   const maxPrefix = Math.max(...Object.values(CATEGORY_PREFIX));
   const newPrefix = maxPrefix + 1000;
+  const chosenMwst = parseFloat(document.getElementById('npNewCatMwst').value);
   CATEGORY_PREFIX[name] = newPrefix;
+  CATEGORY_MWST[name] = chosenMwst;
   CAT_ICONS[name] = '🏷';
   categories.push(name);
   closeNpNewCatRow();
@@ -3057,7 +3118,7 @@ document.getElementById('npNewCatConfirm').addEventListener('click', () => {
   npCategorySelect.value = name;
   updateNpPreview();
   playScanSound();
-  showToast(`Warengruppe "${name}" angelegt — Artikelnummern ab ${newPrefix + 1}.`);
+  showToast(`Warengruppe "${name}" angelegt — Artikelnummern ab ${newPrefix + 1}, MwSt ${(chosenMwst * 100).toFixed(0)}%.`);
 });
 
 function resetNewProductForm(){
